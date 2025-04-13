@@ -1,0 +1,113 @@
+#include "../public/Sniffer.h"
+
+#include <fstream>
+#include <iostream>
+#include <nlohmann/json.hpp>
+
+Sniffer::Sniffer() {}
+
+Sniffer::~Sniffer()
+{
+    stop_capture();
+    if (capture_device)
+    {
+        pcap_freealldevs(capture_device);
+        capture_device = nullptr;
+    }
+}
+
+void Sniffer::start_capture()
+{
+    // Set device~
+    capture_device = get_capture_device();
+    if (!capture_device)
+    {
+        std::cerr << "Error: No capture device found\n";
+        return;
+    }
+
+    
+}
+
+void Sniffer::stop_capture()
+{
+}
+
+void Sniffer::process_packet(const struct pcap_pkthdr* header, const u_char* packet)
+{
+}
+
+pcap_if_t* Sniffer::get_capture_device()
+{
+    char err_buf[PCAP_ERRBUF_SIZE];
+    pcap_if_t* all_devs;
+    if (pcap_findalldevs(&all_devs, err_buf) == -1)
+    {
+        std::cerr << "Error finding devices: %s" << err_buf << '\n';
+        return nullptr;
+    }
+
+    nlohmann::json config;
+    std::string device_name;
+    std::ifstream config_file("config.json");
+    if (!config_file)
+    {
+        std::cout << "No config.json found. Select net devices:\n";
+        device_name = select_capture_device(all_devs);
+
+        config["device_id"] = device_name;
+        std::ofstream out_config_file("config.json");
+        out_config_file << config.dump(4);
+    }
+    else
+    {
+        config_file >> config;
+        device_name = config.value("device_id", "NONE");
+    }
+
+    for (pcap_if_t* d = all_devs; d != nullptr; d = d->next)
+    {
+        if (d->name && d->name == device_name)
+        {
+            std::cout << "Selected Net Device for capture: " << d->description << '\n';
+            return d;
+        }
+    }
+        
+    return nullptr;
+}
+
+std::string Sniffer::select_capture_device(const pcap_if_t* all_devs)
+{
+    int i = 0;
+    for (const pcap_if_t* d = all_devs; d != nullptr; d = d->next)
+    {
+        std::cout << i++ << " : [" << d->name << "] ";
+        if (d->description)
+            std::cout << "- " << d->description;
+        std::cout << '\n';
+    }
+
+    int device_id;
+    std::cout << "Select device id: ";
+    do
+    {
+        if (std::cin >> device_id)
+        {
+            i = 0;
+            for (const pcap_if_t* d = all_devs; d != nullptr; d = d->next)
+            {
+                if (i == device_id)
+                {
+                    return d->name;
+                }
+                i++;
+            }
+        }
+        else
+        {            
+            std::cout << "Invalid input. Please enter a number: ";
+        }
+    } while (true);
+    
+}

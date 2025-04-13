@@ -1,0 +1,4 @@
+[submodule "Json"]
+    path = libs/external/json
+    url = https://github.com/nlohmann/json.git
+	tag = v3.12.0

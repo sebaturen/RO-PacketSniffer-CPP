@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
-
 project(ro-packetsnifer)
 
-include_directories(${CMAKE_HOME_DIRECTORY}/libs/external)
+set(CMAKE_CXX_STANDARD 20)
+
+add_subdirectory(libs/external)
+
+add_subdirectory(src)
