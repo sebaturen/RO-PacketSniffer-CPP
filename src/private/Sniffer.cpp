@@ -9,14 +9,9 @@ Sniffer::Sniffer() {}
 Sniffer::~Sniffer()
 {
     stop_capture();
-    if (capture_device)
-    {
-        pcap_freealldevs(capture_device);
-        capture_device = nullptr;
-    }
 }
 
-void Sniffer::start_capture()
+void Sniffer::start_capture(const std::string& ip_capture)
 {
     // Set device~
     capture_device = get_capture_device();
@@ -26,15 +21,47 @@ void Sniffer::start_capture()
         return;
     }
 
-    
+    char err_buf[PCAP_ERRBUF_SIZE];
+    handle = pcap_open_live(capture_device->name, 65536, 1, 1000, err_buf);
+    if (!handle) {
+        std::cerr << "Failed to open device: " << err_buf << '\n';
+        return;
+    }
+
+    std::cout << "Started packet capture...\n";
+    std::string filter_exp = "dst host " + ip_capture;
+    if (!apply_filter(filter_exp)) {
+        std::cerr << "Failed to set filter: " << filter_exp << '\n';
+        return;
+    }
+
+    pcap_loop(handle, 0, packet_handler, nullptr);
+    return;
+}
+
+bool Sniffer::apply_filter(const std::string& filterExpression) const
+{
+    struct bpf_program fp;
+    if (pcap_compile(handle, &fp, filterExpression.c_str(), 0, PCAP_NETMASK_UNKNOWN) == -1) {
+        std::cerr << "Error compiling filter: " << pcap_geterr(handle) << '\n';
+        return false;
+    }
+
+    if (pcap_setfilter(handle, &fp) == -1) {
+        std::cerr << "Error setting filter: " << pcap_geterr(handle) << '\n';
+        return false;
+    }
+
+    return true;
 }
 
 void Sniffer::stop_capture()
 {
-}
-
-void Sniffer::process_packet(const struct pcap_pkthdr* header, const u_char* packet)
-{
+    if (capture_device)
+    {
+        pcap_freealldevs(capture_device);
+        capture_device = nullptr;
+    }
 }
 
 pcap_if_t* Sniffer::get_capture_device()
@@ -110,4 +137,13 @@ std::string Sniffer::select_capture_device(const pcap_if_t* all_devs)
         }
     } while (true);
     
+}
+
+void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_char* pkt_data)
+{
+    std::cout << "Packet captured: length = " << header->len << std::endl;
+}
+
+void Sniffer::process_packet(const struct pcap_pkthdr* header, const u_char* packet)
+{
 }
