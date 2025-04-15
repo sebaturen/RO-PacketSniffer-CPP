@@ -12,7 +12,7 @@ struct packet_detail
 class PacketDatabase
 {
 public:    
-    static const packet_detail* get(const std::string& id);
+    static const packet_detail* get(const uint16_t& head);
     
 private:
     PacketDatabase();
@@ -20,5 +20,5 @@ private:
     void init();
     static PacketDatabase& instance();
     
-    std::unordered_map<std::string, packet_detail> packet_map;
+    std::unordered_map<uint16_t, packet_detail> packet_map;
 };

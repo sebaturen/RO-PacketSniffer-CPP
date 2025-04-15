@@ -14,6 +14,7 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.h)
 
 add_executable(ROSniffer main.cpp)
+set_target_properties(ROSniffer PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # Include SRC content file
 target_sources(ROSniffer PRIVATE ${SRC_FILES})

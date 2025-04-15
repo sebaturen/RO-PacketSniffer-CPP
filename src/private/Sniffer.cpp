@@ -4,6 +4,8 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
+#include "../public/packets/PacketDatabase.h"
+
 Sniffer::Sniffer() {}
 
 Sniffer::~Sniffer()
@@ -11,7 +13,7 @@ Sniffer::~Sniffer()
     stop_capture();
 }
 
-void Sniffer::start_capture(const std::string& ip_capture)
+void Sniffer::start_capture(const std::vector<std::string>& ip_capture)
 {
     // Set device~
     capture_device = get_capture_device();
@@ -29,7 +31,14 @@ void Sniffer::start_capture(const std::string& ip_capture)
     }
 
     std::cout << "Started packet capture..." << '\n';
-    std::string filter_exp = "dst host " + ip_capture;
+    std::string filter_exp;
+    for (size_t i = 0; i < ip_capture.size(); ++i)
+    {
+        filter_exp += "src host "+ ip_capture[i];
+        if (i != ip_capture.size() - 1)
+            filter_exp += " or ";
+    }
+    
     if (!apply_filter(filter_exp)) {
         std::cerr << "Failed to set filter: " << filter_exp << '\n';
         return;
@@ -141,20 +150,62 @@ std::string Sniffer::select_capture_device(const pcap_if_t* all_devs)
 
 void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_char* pkt_data)
 {
-    std::cout << "Packet captured: length = " << header->len << std::endl;
-    std::cout << "Packet data: ";
-    for (unsigned int i = 0; i < header->len; ++i)
+    const u_char* ip_header = pkt_data + Sniffer::ETHERNET_HEADER_LEN;
+    int ip_header_len = (*ip_header & 0x0F) * 4;
+    u_char protocol = *(ip_header + 9);
+
+    const u_char* transport_header = ip_header + ip_header_len;
+    int transport_header_len = 0;
+
+    if (protocol == Sniffer::TCP)
     {
-        std::cout << std::uppercase
-                  << std::hex
-                  << std::setw(2)
-                  << std::setfill('0')
-                  << static_cast<int>(pkt_data[i]) << " ";
+        transport_header_len = ((*(transport_header + 12)) >> 4) * 4;
     }
+    else if (protocol == Sniffer::UDP)
+    {
+        transport_header_len = 8;
+    }
+    const u_char* payload = transport_header + transport_header_len;
+
+    int total_header_size = ETHERNET_HEADER_LEN + ip_header_len + transport_header_len;
+    unsigned int payload_len = header->len - total_header_size;
     
-    std::cout << std::dec << std::endl;
+    deserialization(payload, payload_len);
 }
 
-void Sniffer::process_packet(const struct pcap_pkthdr* header, const u_char* packet)
+void Sniffer::deserialization(const u_char* payload, const unsigned int payload_len)
 {
+    // ----------------- deserialization ----------------
+    uint16_t packet_id = (payload[1] << 8) | payload[0];
+    std::cout << "["<< packet_id <<"]";
+    const packet_detail* pkt_dt = PacketDatabase::get(packet_id);
+
+    std::cout << "Packet captured: ";
+    if (!pkt_dt)
+    {
+        std::cout << "[" << std::setw(3) << std::setfill('0') << payload_len << "]";
+        std::cout << " data = ";
+        for (unsigned int i = 0; i < payload_len; ++i)
+        {
+            std::cout << std::uppercase
+                      << std::hex
+                      << std::setw(2)
+                      << std::setfill('0')
+                      << static_cast<int>(payload[i]) << " ";
+        }
+        std::cout << std::dec << std::endl;
+        return;
+    }
+
+    if (pkt_dt->size > 0) // variable size
+    {        
+        uint16_t packet_size = (payload[3] << 8) | payload[2];
+        const u_char* packet_data = payload + 4;
+    }
+    else // fix size
+    {
+        const u_char* packet_data = payload + 2;
+    }
+    std::cout << std::dec << std::endl;
+    
 }
