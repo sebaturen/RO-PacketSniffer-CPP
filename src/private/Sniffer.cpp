@@ -32,13 +32,14 @@ void Sniffer::start_capture(const std::vector<std::string>& ip_capture)
     }
 
     std::cout << "Started packet capture..." << '\n';
-    std::string filter_exp;
+    std::string filter_exp = "(";
     for (size_t i = 0; i < ip_capture.size(); ++i)
     {
         filter_exp += "src host "+ ip_capture[i];
         if (i != ip_capture.size() - 1)
             filter_exp += " or ";
     }
+    filter_exp += ") and not (port 80 or port 443)";
     
     if (!apply_filter(filter_exp)) {
         std::cerr << "Failed to set filter: " << filter_exp << '\n';
@@ -155,17 +156,14 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
     int ip_header_len = (*ip_header & 0x0F) * 4;
     u_char protocol = *(ip_header + 9);
 
+    if (protocol != Sniffer::TCP)
+    {        
+        std::cout << "UDP Packet received" << std::hex << ip_header << std::endl;
+        return;
+    }
     const u_char* transport_header = ip_header + ip_header_len;
-    int transport_header_len = 0;
-
-    if (protocol == Sniffer::TCP)
-    {
-        transport_header_len = ((*(transport_header + 12)) >> 4) * 4;
-    }
-    else if (protocol == Sniffer::UDP)
-    {
-        transport_header_len = 8;
-    }
+    
+    int transport_header_len = ((*(transport_header + 12)) >> 4) * 4;
     const u_char* payload = transport_header + transport_header_len;
 
     int total_header_size = ETHERNET_HEADER_LEN + ip_header_len + transport_header_len;
@@ -183,6 +181,7 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
     }
 
     // DEBUG MODE
+    //std::cout << "Comming: ";
     //debug_payload(payload, payload_len);
     // END DEBUG MODE
     
@@ -210,16 +209,16 @@ void Sniffer::deserialization(const u_char* payload, const unsigned int payload_
         const packet_detail* pkt_dt = PacketDatabase::get(packet_id);
 
         if (!pkt_dt || pkt_dt->size == 0) // find sub pack in unknown packet
-        {            
+        {
             // DEBUG MODE
-            std::cout << "Resyncing... -> ["<< std::hex << packet_id << "]" << std::endl;
+            std::cout << "Resyncing... -> ["<< std::hex << packet_id << "]";
             debug_payload(m_buffer.data(), m_buffer.size());
             // END DEBUG MODE
             bool resynced = false;
 
             // Try to find a valid packet ID by sliding through the buffer
             for (size_t i = 1; i < remaining - 1; ++i)
-            {                
+            {
                 uint16_t potential_id = (m_buffer[offset + i + 1] << 8) | m_buffer[offset + i];
                 if (valid_ids.contains(potential_id))
                 {
@@ -227,16 +226,27 @@ void Sniffer::deserialization(const u_char* payload, const unsigned int payload_
                     resynced = true;
                     break;
                 }
+
+                if (offset + i + 4 < m_buffer.size()) // Check for HTTP header
+                {
+                    const u_char* chunk = m_buffer.data() + offset + i - 1;
+                    if (m_buffer.size() > 4 && std::memcmp(chunk, "HTTP", 4) == 0)
+                    {
+                        std::cout << "HTTP Packet received -- drop data" << std::endl;
+                        m_buffer.clear();
+                        return;
+                    }
+                }
             }
 
-            // If we couldn't resync, break out of the loop
+            // If we couldn't find know package, break out of the loop
             if (!resynced)
                 break;
 
             continue;
         }
         
-        size_t total_size = 0;
+        size_t total_size;
 
         // Determine total size based on whether the packet size is fixed or variable
         if (pkt_dt->size == -1)
@@ -245,16 +255,29 @@ void Sniffer::deserialization(const u_char* payload, const unsigned int payload_
                 break;
 
             total_size = (m_buffer[offset + 3] << 8) | m_buffer[offset + 2];
+
+            if (total_size == 0)
+            {
+                offset += 2; // Skip the header
+                break;
+            }
+        }
+        else if (pkt_dt->size == -2)
+        {
+            std::cout << "Totally Unknown Packet received -- drop data" << std::endl;
+            m_buffer.clear();
+            return;
         }
         else // Fixed size
         {
             total_size = pkt_dt->size;
         }
 
-        if (total_size > remaining) // packet uncompleted
-            break;
+        if ( total_size > remaining) // packet uncompleted
+            return;
 
         // Call the packet handler to deserialize the data
+        std::cout << " [0x" << std::hex << packet_id << "]";
         if (pkt_dt->handler)
         {
             pkt_dt->handler->deserialize(&m_buffer[offset], total_size);
