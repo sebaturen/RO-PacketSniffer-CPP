@@ -1,11 +1,21 @@
 #include "../public/Sniffer.h"
 
 #include <fstream>
+#include <algorithm>
 #include <iostream>
+#include <thread>
 #include <nlohmann/json.hpp>
 
 #include "../public/packets/DeserializeHandler.h"
 #include "../public/packets/PacketDatabase.h"
+
+namespace SnifferSpace
+{
+    constexpr size_t MAX_BUFFER_SIZE = 1024 * 1024 * 1024; // 1GB
+    constexpr static int ETHERNET_HEADER_LEN = 14;
+    constexpr static int TCP = 6;
+    constexpr static int UDP = 17;
+}
 
 std::vector<u_char> Sniffer::m_buffer;
 
@@ -73,6 +83,11 @@ void Sniffer::stop_capture()
         pcap_freealldevs(capture_device);
         capture_device = nullptr;
     }
+}
+
+void Sniffer::self_test(const u_char* payload, const unsigned int payload_len )
+{    
+    processIncomingData(payload, payload_len);
 }
 
 pcap_if_t* Sniffer::get_capture_device()
@@ -150,13 +165,26 @@ std::string Sniffer::select_capture_device(const pcap_if_t* all_devs)
     
 }
 
+void Sniffer::save_payload(const u_char* payload, unsigned int payload_len)
+{
+    std::ofstream outFile("log_packets.txt", std::ios::app);
+
+    for (size_t i = 0; i < payload_len; ++i) {
+        outFile << std::hex << std::uppercase   // salida en mayúscula (opcional)
+                << std::setw(2) << std::setfill('0') // rellenar con 0 si es necesario
+                << static_cast<int>(payload[i]) << " ";
+    }
+    outFile << std::endl;
+    outFile.close();
+}
+
 void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_char* pkt_data)
 {
-    const u_char* ip_header = pkt_data + Sniffer::ETHERNET_HEADER_LEN;
+    const u_char* ip_header = pkt_data + SnifferSpace::ETHERNET_HEADER_LEN;
     int ip_header_len = (*ip_header & 0x0F) * 4;
     u_char protocol = *(ip_header + 9);
 
-    if (protocol != Sniffer::TCP)
+    if (protocol != SnifferSpace::TCP)
     {        
         std::cout << "UDP Packet received" << std::hex << ip_header << std::endl;
         return;
@@ -166,11 +194,11 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
     int transport_header_len = ((*(transport_header + 12)) >> 4) * 4;
     const u_char* payload = transport_header + transport_header_len;
 
-    int total_header_size = ETHERNET_HEADER_LEN + ip_header_len + transport_header_len;
+    int total_header_size = SnifferSpace::ETHERNET_HEADER_LEN + ip_header_len + transport_header_len;
     unsigned int payload_len = header->len - total_header_size;
 
     // validate zero payload
-    if (payload_len > 0) {
+    /*if (payload_len > 0) {
         std::vector<unsigned char> zeros_compare(payload_len, 0);
         if (std::memcmp(payload, zeros_compare.data(), payload_len) == 0)
         {
@@ -178,120 +206,162 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
         }
     } else {
         return;
-    }
+    }*/
 
     // DEBUG MODE
     //std::cout << "Comming: ";
-    //debug_payload(payload, payload_len);
+    debug_payload(payload, payload_len);
+    save_payload(payload, payload_len);
     // END DEBUG MODE
-    
-    deserialization(payload, payload_len);
+
+    //processIncomingData(payload, payload_len);
+    //deserialization(payload, payload_len);
 }
 
-void Sniffer::deserialization(const u_char* payload, const unsigned int payload_len)
+void Sniffer::processIncomingData(const u_char* payload, const unsigned int payload_len)
 {
-    // Insert the new payload into the buffer
     m_buffer.insert(m_buffer.end(), payload, payload + payload_len);
 
-    // Obtain the list of valid packet IDs
-    const auto& valid_ids = PacketDatabase::get_all_ids();
-
-    size_t offset = 0;
-    while (offset < m_buffer.size()) // Ensure we do not go out of bounds
+    while (m_buffer.size() >= 2)
     {
-        size_t remaining = m_buffer.size() - offset;
-        
-        if (remaining < 2) 
-            break; // Can't process a packet header if there aren't at least 2 bytes
-
-        // Extract the packet ID from the first two bytes
-        uint16_t packet_id = (m_buffer[offset + 1] << 8) | m_buffer[offset];
-        const packet_detail* pkt_dt = PacketDatabase::get(packet_id);
-
-        if (!pkt_dt || pkt_dt->size == 0) // find sub pack in unknown packet
+        if (m_buffer.size() > SnifferSpace::MAX_BUFFER_SIZE)
         {
-            // DEBUG MODE
-            std::cout << "Resyncing... -> ["<< std::hex << packet_id << "]";
-            debug_payload(m_buffer.data(), m_buffer.size());
-            // END DEBUG MODE
-            bool resynced = false;
-
-            // Try to find a valid packet ID by sliding through the buffer
-            for (size_t i = 1; i < remaining - 1; ++i)
-            {
-                uint16_t potential_id = (m_buffer[offset + i + 1] << 8) | m_buffer[offset + i];
-                if (valid_ids.contains(potential_id))
-                {
-                    offset += i; // Adjust offset to resync
-                    resynced = true;
-                    break;
-                }
-
-                if (offset + i + 4 < m_buffer.size()) // Check for HTTP header
-                {
-                    const u_char* chunk = m_buffer.data() + offset + i - 1;
-                    if (m_buffer.size() > 4 && std::memcmp(chunk, "HTTP", 4) == 0)
-                    {
-                        std::cout << "HTTP Packet received -- drop data" << std::endl;
-                        m_buffer.clear();
-                        return;
-                    }
-                }
-            }
-
-            // If we couldn't find know package, break out of the loop
-            if (!resynced)
-                break;
-
-            continue;
-        }
-        
-        size_t total_size;
-
-        // Determine total size based on whether the packet size is fixed or variable
-        if (pkt_dt->size == -1)
-        {
-            if (remaining < 4)
-                break;
-
-            total_size = (m_buffer[offset + 3] << 8) | m_buffer[offset + 2];
-
-            if (total_size == 0)
-            {
-                offset += 2; // Skip the header
-                break;
-            }
-        }
-        else if (pkt_dt->size == -2)
-        {
-            std::cout << "Totally Unknown Packet received -- drop data" << std::endl;
+            log("[WARN] Buffer size exceeded, clearing buffer.");
             m_buffer.clear();
             return;
         }
-        else // Fixed size
+
+        uint16_t header = static_cast<uint16_t>(m_buffer[0]) | (static_cast<uint16_t>(m_buffer[1]) << 8);
+        const packet_detail* detail = PacketDatabase::get(header);
+
+        if (!detail)
         {
-            total_size = pkt_dt->size;
+            std::string msg = "[INFO] Unknown packet. Header: " + hexStr(header);
+            if (lastKnowHeader != 0)
+            {
+                msg += " lastKnowHeader: " + hexStr(lastKnowHeader);
+            }
+            log(msg);
+            m_buffer.erase(m_buffer.begin());
+            continue;
         }
 
-        if ( total_size > remaining) // packet uncompleted
-            return;
-
-        // Call the packet handler to deserialize the data
-        std::cout << " [0x" << std::hex << packet_id << "]";
-        if (pkt_dt->handler)
+        size_t packetSize = 0;
+        bool valid = false;
+        switch (detail->type)
         {
-            pkt_dt->handler->deserialize(&m_buffer[offset], total_size);
+        case PacketSizeType::FIXED: case PacketSizeType::FIXED_MIN:
+            {
+                packetSize = detail->size;
+                valid = m_buffer.size() >= packetSize;
+                break;                
+            }
+
+        case PacketSizeType::INDICATED_IN_PACKET:
+            {
+                if (m_buffer.size() >= 4)
+                {
+                    packetSize = static_cast<uint16_t>(m_buffer[2]) | (static_cast<uint16_t>(m_buffer[3]) << 8);
+                    if (packetSize < 4 || packetSize > 600)
+                    {
+                        log("[WARN] Invalid packet size (too small/to big) for header: " + hexStr(header));
+                        m_buffer.erase(m_buffer.begin());
+                        continue;                        
+                    }
+                    valid = m_buffer.size() >= packetSize;
+                }
+                break;                
+            }
+            
+        case PacketSizeType::ASCII_TERMINATED:
+            {
+                if (m_buffer.size() >= detail->size)
+                {
+                    auto start = m_buffer.begin() + detail->size;
+                    auto ascii_it = std::find_if(start, m_buffer.end(), [](uint16_t byte) { return !isAscii(byte); });
+                    packetSize = std::distance(m_buffer.begin(), ascii_it) + 1;
+                    packetSize = (std::min)(packetSize, static_cast<size_t>(100));
+                    valid = m_buffer.size() >= packetSize;
+                }
+                break;                
+            }
+
+        case PacketSizeType::HTTP:
+            {
+                constexpr char end_pattern[] = "\r\n\r\n";
+                auto http_it = std::search(
+                    m_buffer.begin(),
+                    m_buffer.end(),
+                    std::begin(end_pattern),
+                    std::end(end_pattern) - 1
+                );
+                if (http_it != m_buffer.end())
+                {
+                    size_t headerEnd = std::distance(m_buffer.begin(), http_it) + 4;
+
+                    size_t contentLength = 0;
+                    std::string headers(m_buffer.begin(), m_buffer.begin() + headerEnd);
+                    auto pos = headers.find("Content-Length:");
+                    if (pos != std::string::npos)
+                    {
+                        size_t endLine = headers.find("\r\n", pos);
+                        std::string lenStr = headers.substr(pos + 15, endLine - pos - 15);
+                        contentLength = static_cast<size_t>(std::stoi(lenStr));
+                    }
+                    packetSize = headerEnd + contentLength;
+                    valid = m_buffer.size() >= packetSize;
+                }
+                break;   
+            }
+            
+        case PacketSizeType::UNKNOWN:
+            {
+                log("[INFO] Unknown packet. Header: " + hexStr(header));
+                m_buffer.erase(m_buffer.begin());
+                continue;                
+            }
         }
-        
-        // Move the offset forward by the total size of the processed packet
-        offset += total_size;
+
+        if (valid)
+        {
+            if (detail->alert)
+            {
+                log("[WARN] Alert packet. Header: " + hexStr(header) + " Size: " + std::to_string(packetSize));
+                debug_payload(m_buffer.data(), m_buffer.size());
+            }
+            lastKnowHeader = header;
+            log("[INFO] Deserializing packet. Header: " + hexStr(header) + " Size: " + std::to_string(packetSize));
+            std::span<const uint8_t> packetSpan{ m_buffer.data(), packetSize };
+            if (detail->handler)
+            {
+                /*std::thread([handler = detail->handler, packet = std::vector<uint8_t>(packetSpan.begin(), packetSpan.end())]()
+                {
+                   handler(packet);
+               }).detach();*/
+                detail->handler->deserialize(packetSpan.data(), packetSize);
+            }
+            m_buffer.erase(m_buffer.begin(), m_buffer.begin() + packetSize);
+        }
+        else
+        {
+            break;
+        }
     }
+}
 
-    // Erase the processed data from the buffer
-    if (offset > 0)
+void Sniffer::log(const std::string& msg)
+{
+    if (bDebugMode)
     {
-        m_buffer.erase(m_buffer.begin(), m_buffer.begin() + offset);
+        auto now = std::chrono::system_clock::now();
+        auto t = std::chrono::system_clock::to_time_t(now);
+        std::clog << std::put_time(std::localtime(&t), "%F %T") << " - " << msg << std::endl;
     }
+}
+
+bool Sniffer::isAscii(uint16_t byte)
+{
+    return std::isalpha(byte) || byte == '_' || byte == '-' || byte == '.';
 }
 
 void Sniffer::debug_payload(const u_char* payload, unsigned int payload_len)
@@ -306,4 +376,11 @@ void Sniffer::debug_payload(const u_char* payload, unsigned int payload_len)
                   << static_cast<int>(payload[i]) << " ";
     }
     std::cout << "]" << std::dec << std::endl;
+}
+
+std::string Sniffer::hexStr(uint16_t val)
+{
+    std::ostringstream oss;
+    oss << "0x" << std::hex << std::setw(4) << std::setfill('0') << val;
+    return oss.str();
 }

@@ -6,11 +6,22 @@
 
 class DeserializeHandler;
 
+enum class PacketSizeType {
+    FIXED,
+    INDICATED_IN_PACKET,
+    ASCII_TERMINATED,
+    UNKNOWN,
+    FIXED_MIN,
+    HTTP,
+};
+
 struct packet_detail
 {
+    std::string desc;
     int16_t size;
+    PacketSizeType type;
     const DeserializeHandler* handler;
-    std::string description;
+    bool alert = false;
 };
 
 class PacketDatabase
