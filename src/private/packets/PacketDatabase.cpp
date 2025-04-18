@@ -656,7 +656,7 @@ void PacketDatabase::init()
     packet_map[0x0b13] = { .desc = "Item Preview", .size = 48, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0b18] = { .desc = "Inventory Expansion Result", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0b1a] = { .desc = "Skill Cast", .size = 29, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0b1b] = { .desc = "Load Confirm", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
+    packet_map[0x0b1b] = { .desc = "Load Confirm", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0b1d] = { .desc = "Ping", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
     packet_map[0x0b20] = { .desc = "Hotkeys", .size = 271, .type = PacketSizeType::FIXED, .handler = nullptr};
     packet_map[0x0b2f] = { .desc = "Homunculus Property", .size = 73, .type = PacketSizeType::FIXED, .handler = nullptr };

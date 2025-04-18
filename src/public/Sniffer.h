@@ -31,7 +31,7 @@ private:
     bool apply_filter(const std::string& filterExpression) const;
     
     pcap_t *handle;
-    pcap_if_t* capture_device;
+    pcap_if_t* capture_device = nullptr;
     static std::vector<u_char> m_buffer;
     inline static bool bDebugMode = true;
     inline static uint16_t lastKnowHeader = 0;
