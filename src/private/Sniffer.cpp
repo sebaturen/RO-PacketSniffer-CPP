@@ -355,7 +355,7 @@ void Sniffer::log(const std::string& msg)
     {
         auto now = std::chrono::system_clock::now();
         auto t = std::chrono::system_clock::to_time_t(now);
-        std::clog << std::put_time(std::localtime(&t), "%F %T") << " - " << msg << std::endl;
+        std::cout << std::put_time(std::localtime(&t), "%F %T") << " - " << msg << std::endl;
     }
 }
 

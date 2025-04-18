@@ -68,7 +68,7 @@ void PacketDatabase::init()
     packet_map[0x0098] = { .desc = "Private Message Sent", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x009a] = { .desc = "System Chat", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x009c] = { .desc = "Actor Look At", .size = 9, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x009d] = { .desc = "Item Exists", .size = 17, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
+    packet_map[0x009d] = { .desc = "Item Exists", .size = 19, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x009e] = { .desc = "Item Appeared", .size = 17, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[0x00a0] = { .desc = "Inventory Item Added", .size = 23, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[0x00a1] = { .desc = "Item Disappeared", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -86,7 +86,7 @@ void PacketDatabase::init()
     packet_map[0x00b4] = { .desc = "Npc Talk", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x00b5] = { .desc = "Npc Talk Continue", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x00b6] = { .desc = "Npc Talk Close", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x00b7] = { .desc = "Npc Talk Responses", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
+    packet_map[0x00b7] = { .desc = "Npc Talk Responses", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x00bc] = { .desc = "Stats Added", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x00bd] = { .desc = "Stats Info", .size = 44, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x00be] = { .desc = "Stat Info", .size = 5, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -241,7 +241,7 @@ void PacketDatabase::init()
     packet_map[0x01c3] = { .desc = "Local Broadcast", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x01c4] = { .desc = "Storage Item Added", .size = 22, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[0x01c5] = { .desc = "Cart Item Added", .size = 22, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
-    packet_map[0x01c8] = { .desc = "Item Used", .size = 13, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
+    packet_map[0x01c8] = { .desc = "Item Used", .size = 15, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x01c9] = { .desc = "Area Spell", .size = 97, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x01cd] = { .desc = "Sage Autospell", .size = 2, .type = PacketSizeType::FIXED_MIN, .handler = nullptr, .alert = true };
     packet_map[0x01cf] = { .desc = "Devotion", .size = 28, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -332,7 +332,7 @@ void PacketDatabase::init()
     packet_map[0x0287] = { .desc = "Cash Dealer", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0289] = { .desc = "Cash Buy Fail", .size = 12, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[0x028a] = { .desc = "Character Status", .size = 18, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0291] = { .desc = "Message String", .size = 4, .type = PacketSizeType::FIXED, .handler = nullptr };
+    packet_map[0x0291] = { .desc = "Message String", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0293] = { .desc = "Boss Map Info", .size = 43, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[0x0294] = { .desc = "Book Read", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0295] = { .desc = "Inventory Items Nonstackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -355,7 +355,7 @@ void PacketDatabase::init()
     packet_map[0x02b4] = { .desc = "Quest Delete", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x02b5] = { .desc = "Quest Update Mission Hunt", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x02b7] = { .desc = "Quest Active", .size = 7, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x02b8] = { .desc = "Party Show Picker", .size = 22, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
+    packet_map[0x02b8] = { .desc = "Party Show Picker", .size = 32, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x02b9] = { .desc = "Hotkeys", .size = 2, .type = PacketSizeType::FIXED_MIN, .handler = nullptr, .alert = true };
     packet_map[0x02c1] = { .desc = "Npc Chat", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x02c5] = { .desc = "Party Invite Result", .size = 30, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -521,7 +521,7 @@ void PacketDatabase::init()
     packet_map[0x09ca] = { .desc = "Area Spell Multiple3", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x09cb] = { .desc = "Skill Used No Damage", .size = 17, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x09cd] = { .desc = "Message String", .size = 8, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x09cf] = { .desc = "Gameguard Request", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
+    packet_map[0x09cf] = { .desc = "Gameguard Request", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x09d1] = { .desc = "Progress Bar Unit", .size = 14, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x09d5] = { .desc = "Npc Market Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x09d7] = { .desc = "Npc Market Purchase Result", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -632,7 +632,7 @@ void PacketDatabase::init()
     packet_map[0x0acd] = { .desc = "Login Error", .size = 23, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0ada] = { .desc = "Refine Status", .size = 32, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0adc] = { .desc = "Misc Config", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0add] = { .desc = "Item Appeared", .size = 22, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
+    packet_map[0x0add] = { .desc = "Item Appeared", .size = 24, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0ade] = { .desc = "Overweight Percent", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0adf] = { .desc = "Actor Info", .size = 58, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0ae0] = { .desc = "Login Error", .size = 30, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -682,12 +682,6 @@ void PacketDatabase::init()
     packet_map[0x0b7e] = { .desc = "Guild Member Add", .size = 60, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0b8d] = { .desc = "Repute Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0ba4] = { .desc = "Homunculus Property", .size = 85, .type = PacketSizeType::FIXED, .handler = nullptr };
-
-
-
-
-
-    // Unknown
     
     for (const auto& [id, _] : packet_map)
         s_valid_ids.insert(id);
