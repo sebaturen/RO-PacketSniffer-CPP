@@ -12,6 +12,7 @@
 namespace SnifferSpace
 {
     constexpr size_t MAX_BUFFER_SIZE = 1024 * 1024 * 1024; // 1GB
+    constexpr size_t MAX_HTTP_CHUNK_SIZE = 64 * 1024; // 64KB
     constexpr static int ETHERNET_HEADER_LEN = 14;
     constexpr static int TCP = 6;
     constexpr static int UDP = 17;
@@ -325,6 +326,13 @@ size_t Sniffer::processHttpPacket(const std::vector<uint8_t>& buffer, bool& vali
             size_t totalSize = std::distance(buffer.begin(), chunkEndIt) + 4;
             if (buffer.size() >= totalSize)
             {
+                valid = true;
+                return totalSize;
+            }
+
+            if (totalSize >= SnifferSpace::MAX_HTTP_CHUNK_SIZE)
+            {
+                log("[WARN][HTTP] Buffer size exceeded, clearing buffer.");
                 valid = true;
                 return totalSize;
             }
