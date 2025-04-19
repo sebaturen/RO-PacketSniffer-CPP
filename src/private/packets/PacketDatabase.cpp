@@ -31,6 +31,7 @@ const std::unordered_set<uint16_t>& PacketDatabase::get_all_ids()
 void PacketDatabase::init()
 {
     packet_map[0x5448] = { .desc = "HTTP Response", .size = -1, .type = PacketSizeType::HTTP, .handler = nullptr };
+    packet_map[0x0000] = { .desc = "Empty", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr };
 
     // https://github.com/OpenKore/openkore/blob/master/src/Network/Receive/ServerType0.pm
     packet_map[0x0069] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -42,7 +43,7 @@ void PacketDatabase::init()
     packet_map[0x006f] = { .desc = "Character Deletion Successful", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
     packet_map[0x0070] = { .desc = "Character Deletion Failed", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
     packet_map[0x0071] = { .desc = "Received Character Id And Map", .size = 28, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0072] = { .desc = "Received Characters", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr, .alert = true };
+    packet_map[0x0072] = { .desc = "Received Characters", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0073] = { .desc = "Map Loaded", .size = 11, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0074] = { .desc = "Map Load Error", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0075] = { .desc = "Changetoingamestate", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
@@ -105,7 +106,7 @@ void PacketDatabase::init()
     packet_map[0x00d7] = { .desc = "Chat Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x00d8] = { .desc = "Chat Removed", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x00da] = { .desc = "Chat Join Result", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x00db] = { .desc = "Chat Users", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
+    packet_map[0x00db] = { .desc = "Chat Users", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x00dc] = { .desc = "Chat User Join", .size = 28, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x00dd] = { .desc = "Chat User Leave", .size = 29, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x00df] = { .desc = "Chat Modified", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -171,7 +172,7 @@ void PacketDatabase::init()
     packet_map[0x0142] = { .desc = "Npc Talk Number", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0144] = { .desc = "Minimap Indicator", .size = 23, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0145] = { .desc = "Npc Image", .size = 19, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0147] = { .desc = "Item Skill", .size = 14, .type = PacketSizeType::ASCII_TERMINATED, .handler = nullptr, .alert = true };
+    packet_map[0x0147] = { .desc = "Item Skill", .size = 39, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0148] = { .desc = "Resurrection", .size = 8, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x014a] = { .desc = "Manner Message", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x014b] = { .desc = "Gm Silence", .size = 27, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -275,9 +276,9 @@ void PacketDatabase::init()
     packet_map[0x01fc] = { .desc = "Repair List", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
     packet_map[0x01fe] = { .desc = "Repair Result", .size = 5, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x01ff] = { .desc = "High Jump", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0201] = { .desc = "Friend List", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
+    packet_map[0x0201] = { .desc = "Friend List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0205] = { .desc = "Divorced", .size = 26, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0206] = { .desc = "Friend Logon", .size = 11, .type = PacketSizeType::FIXED, .handler = nullptr };
+    packet_map[0x0206] = { .desc = "Friend Logon", .size = 35, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0207] = { .desc = "Friend Request", .size = 34, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0209] = { .desc = "Friend Response", .size = 36, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x020a] = { .desc = "Friend Removed", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -332,7 +333,7 @@ void PacketDatabase::init()
     packet_map[0x0287] = { .desc = "Cash Dealer", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0289] = { .desc = "Cash Buy Fail", .size = 12, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[0x028a] = { .desc = "Character Status", .size = 18, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0291] = { .desc = "Message String", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
+    packet_map[0x0291] = { .desc = "Message String", .size = 4, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0293] = { .desc = "Boss Map Info", .size = 43, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[0x0294] = { .desc = "Book Read", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0295] = { .desc = "Inventory Items Nonstackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -433,7 +434,7 @@ void PacketDatabase::init()
     packet_map[0x0810] = { .desc = "Open Buying Store", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0812] = { .desc = "Open Buying Store Fail", .size = 4, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[0x0813] = { .desc = "Open Buying Store Item List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
-    packet_map[0x0814] = { .desc = "Buying Store Found", .size = 6, .type = PacketSizeType::ASCII_TERMINATED, .handler = nullptr, .alert = true };
+    packet_map[0x0814] = { .desc = "Buying Store Found", .size = 86, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0816] = { .desc = "Buying Store Lost", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0818] = { .desc = "Buying Store Items List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x081a] = { .desc = "Buying Buy Fail", .size = 4, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -459,6 +460,7 @@ void PacketDatabase::init()
     packet_map[0x0857] = { .desc = "Actor Exists", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0858] = { .desc = "Actor Connected", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0859] = { .desc = "Show Eq", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
+    packet_map[0x0871] = { .desc = "Unknown", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x08b3] = { .desc = "Show Script", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x08b4] = { .desc = "Pet Capture Process", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
     packet_map[0x08b6] = { .desc = "Pet Capture Result", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -652,7 +654,7 @@ void PacketDatabase::init()
     packet_map[0x0b09] = { .desc = "Item List Stackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0b0a] = { .desc = "Item List Nonstackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0b0b] = { .desc = "Item List End", .size = 4, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0b0c] = { .desc = "Quest Add", .size = 17, .type = PacketSizeType::FIXED_MIN, .handler = nullptr, .alert = true };
+    packet_map[0x0b0c] = { .desc = "Quest Add", .size = 155, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0b13] = { .desc = "Item Preview", .size = 48, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0b18] = { .desc = "Inventory Expansion Result", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0b1a] = { .desc = "Skill Cast", .size = 29, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -668,7 +670,8 @@ void PacketDatabase::init()
     packet_map[0x0b41] = { .desc = "Inventory Item Added", .size = 70, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0b44] = { .desc = "Storage Item Added", .size = 58, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[0x0b45] = { .desc = "Cart Item Added", .size = 58, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[0x0b47] = { .desc = "Char Emblem Update", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
+    packet_map[0x0b47] = { .desc = "Char Emblem Update", .size = 14, .type = PacketSizeType::FIXED, .handler = nullptr };
+    packet_map[0x0b4d] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0b5f] = { .desc = "Rodex Mail List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0b60] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[0x0b6f] = { .desc = "Character Creation Successful", .size = 2, .type = PacketSizeType::FIXED_MIN, .handler = nullptr, .alert = true };
