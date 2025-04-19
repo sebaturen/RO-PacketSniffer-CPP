@@ -4,7 +4,7 @@
 
 class SelfChat : public DeserializeHandler {
 public:
-    void deserialize(const uint8_t* data, size_t len) const override;
+    void deserialize(const std::vector<unsigned char> data) const override;
 };
 
 static const SelfChat g_selfChatHandler;

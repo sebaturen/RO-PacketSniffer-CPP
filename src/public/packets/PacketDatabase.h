@@ -9,7 +9,6 @@ class DeserializeHandler;
 enum class PacketSizeType {
     FIXED,
     INDICATED_IN_PACKET,
-    ASCII_TERMINATED,
     UNKNOWN,
     FIXED_MIN,
     HTTP,

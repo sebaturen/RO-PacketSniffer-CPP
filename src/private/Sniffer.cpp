@@ -196,30 +196,18 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
 
     int total_header_size = SnifferSpace::ETHERNET_HEADER_LEN + ip_header_len + transport_header_len;
     unsigned int payload_len = header->len - total_header_size;
-
-    // validate zero payload
-    /*if (payload_len > 0) {
-        std::vector<unsigned char> zeros_compare(payload_len, 0);
-        if (std::memcmp(payload, zeros_compare.data(), payload_len) == 0)
-        {
-            return;
-        }
-    } else {
-        return;
-    }*/
-
+    
     // DEBUG MODE
-    //std::cout << "Comming: ";
+    std::cout << "Comming: ";
     debug_payload(payload, payload_len);
-    save_payload(payload, payload_len);
+    //save_payload(payload, payload_len);
     // END DEBUG MODE
 
-    //processIncomingData(payload, payload_len);
-    //deserialization(payload, payload_len);
+    processIncomingData(payload, payload_len);
 }
 
 void Sniffer::processIncomingData(const u_char* payload, const unsigned int payload_len)
-{
+{    
     m_buffer.insert(m_buffer.end(), payload, payload + payload_len);
 
     while (m_buffer.size() >= 2)
@@ -262,7 +250,7 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
                 if (m_buffer.size() >= 4)
                 {
                     packetSize = static_cast<uint16_t>(m_buffer[2]) | (static_cast<uint16_t>(m_buffer[3]) << 8);
-                    if (packetSize < 4 || packetSize > 600)
+                    if (packetSize < 4 || packetSize > 10000)
                     {
                         log("[WARN] Invalid packet size (too small/to big) for header: " + hexStr(header));
                         m_buffer.erase(m_buffer.begin());
@@ -273,45 +261,10 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
                 break;                
             }
             
-        case PacketSizeType::ASCII_TERMINATED:
-            {
-                if (m_buffer.size() >= detail->size)
-                {
-                    auto start = m_buffer.begin() + detail->size;
-                    auto ascii_it = std::find_if(start, m_buffer.end(), [](uint16_t byte) { return !isAscii(byte); });
-                    packetSize = std::distance(m_buffer.begin(), ascii_it) + 1;
-                    packetSize = (std::min)(packetSize, static_cast<size_t>(100));
-                    valid = m_buffer.size() >= packetSize;
-                }
-                break;                
-            }
-
         case PacketSizeType::HTTP:
             {
-                constexpr char end_pattern[] = "\r\n\r\n";
-                auto http_it = std::search(
-                    m_buffer.begin(),
-                    m_buffer.end(),
-                    std::begin(end_pattern),
-                    std::end(end_pattern) - 1
-                );
-                if (http_it != m_buffer.end())
-                {
-                    size_t headerEnd = std::distance(m_buffer.begin(), http_it) + 4;
-
-                    size_t contentLength = 0;
-                    std::string headers(m_buffer.begin(), m_buffer.begin() + headerEnd);
-                    auto pos = headers.find("Content-Length:");
-                    if (pos != std::string::npos)
-                    {
-                        size_t endLine = headers.find("\r\n", pos);
-                        std::string lenStr = headers.substr(pos + 15, endLine - pos - 15);
-                        contentLength = static_cast<size_t>(std::stoi(lenStr));
-                    }
-                    packetSize = headerEnd + contentLength;
-                    valid = m_buffer.size() >= packetSize;
-                }
-                break;   
+                packetSize = processHttpPacket(m_buffer, valid);
+                break;
             }
             
         case PacketSizeType::UNKNOWN:
@@ -334,11 +287,11 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
             std::span<const uint8_t> packetSpan{ m_buffer.data(), packetSize };
             if (detail->handler)
             {
-                /*std::thread([handler = detail->handler, packet = std::vector<uint8_t>(packetSpan.begin(), packetSpan.end())]()
-                {
-                   handler(packet);
-               }).detach();*/
-                detail->handler->deserialize(packetSpan.data(), packetSize);
+                std::thread([handler = detail->handler, packet = std::vector<uint8_t>(packetSpan.begin(), packetSpan.end())]() {
+                    handler->deserialize(packet);
+                }).detach();
+                
+                //detail->handler->deserialize(packetSpan.data(), packetSize);
             }
             m_buffer.erase(m_buffer.begin(), m_buffer.begin() + packetSize);
         }
@@ -347,6 +300,53 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
             break;
         }
     }
+}
+
+size_t Sniffer::processHttpPacket(const std::vector<uint8_t>& buffer, bool& valid)
+{
+    constexpr uint8_t delimiter[] = {0x0D, 0x0A, 0x0D, 0x0A};
+    
+    auto headerEndIt = std::search(buffer.begin(), buffer.end(), std::begin(delimiter), std::end(delimiter));
+    if (headerEndIt == buffer.end())
+    {
+        valid = false;
+        return 0;
+    }
+
+    size_t headerEnd = std::distance(buffer.begin(), headerEndIt) + 4;
+    std::string headers(buffer.begin(), buffer.begin() + headerEnd);
+    bool isChunked = headers.find("Transfer-Encoding: chunked") != std::string::npos;
+
+    if (isChunked)
+    {
+        auto chunkEndIt = std::search(buffer.begin() + headerEnd, buffer.end(), std::begin(delimiter), std::end(delimiter));
+        if (chunkEndIt != buffer.end())
+        {
+            size_t totalSize = std::distance(buffer.begin(), chunkEndIt) + 4;
+            if (buffer.size() >= totalSize)
+            {
+                valid = true;
+                return totalSize;
+            }
+        }
+
+        valid = false;
+        return 0;
+    }
+
+    auto pos = headers.find("Content-Length:");
+    if (pos != std::string::npos)
+    {
+        size_t endLine = headers.find("\r\n", pos);
+        std::string lenStr = headers.substr(pos + 15, endLine - pos - 15);
+        size_t contentLength = static_cast<size_t>(std::stoi(lenStr));
+        valid = buffer.size() >= headerEnd + contentLength;
+        return headerEnd + contentLength;
+    }
+
+    // fallback: only header
+    valid = true;
+    return headerEnd;
 }
 
 void Sniffer::log(const std::string& msg)

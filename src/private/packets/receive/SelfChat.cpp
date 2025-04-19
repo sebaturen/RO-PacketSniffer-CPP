@@ -1,6 +1,6 @@
 #include "../../../public/packets/receive/SelfChat.h"
 
-void SelfChat::deserialize(const uint8_t* data, size_t len) const
+void SelfChat::deserialize(const std::vector<unsigned char> data) const
 {
     
 }

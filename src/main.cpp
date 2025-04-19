@@ -8,7 +8,6 @@
 void test_pack_file(const std::string& filename);
 
 int main() {
-    //Sniffer sniffer;
     std::vector<std::string> ip_list =
     {
         // login server
@@ -17,8 +16,9 @@ int main() {
         "35.198.41.33", // prontera - map
         "34.95.145.188", // prontera -inn
     };
-    //sniffer.start_capture(ip_list);
-    test_pack_file("pre_event_log_packets.txt");
+    Sniffer sniffer;
+    sniffer.start_capture(ip_list);
+    //test_pack_file("log_packets.txt");
     return 0;
 }
 
