@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "PackeTable.h"
+
 class DeserializeHandler;
 
 enum class PacketSizeType {
@@ -19,22 +21,21 @@ struct packet_detail
     std::string desc;
     int16_t size;
     PacketSizeType type;
-    const DeserializeHandler* handler;
+    DeserializeHandler* handler;
     bool alert = false;
 };
 
 class PacketDatabase
 {
 public:    
-    static const packet_detail* get(const uint16_t& head);
-    static const std::unordered_set<uint16_t>& get_all_ids();
+    static const packet_detail* get(const PacketInfo& head);
     
 private:
     PacketDatabase();
     
     void init();
+    
     static PacketDatabase& instance();
     
-    std::unordered_map<uint16_t, packet_detail> packet_map;
-    static std::unordered_set<uint16_t> s_valid_ids;
+    std::unordered_map<PacketInfo, packet_detail> packet_map;
 };

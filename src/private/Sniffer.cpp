@@ -221,7 +221,7 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
         }
 
         uint16_t header = static_cast<uint16_t>(m_buffer[0]) | (static_cast<uint16_t>(m_buffer[1]) << 8);
-        const packet_detail* detail = PacketDatabase::get(header);
+        const packet_detail* detail = PacketDatabase::get(static_cast<PacketInfo>(header));
 
         if (!detail)
         {
@@ -288,8 +288,8 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
             std::span<const uint8_t> packetSpan{ m_buffer.data(), packetSize };
             if (detail->handler)
             {
-                std::thread([handler = detail->handler, packet = std::vector<uint8_t>(packetSpan.begin(), packetSpan.end())]() {
-                    handler->deserialize(packet);
+                std::thread([header = static_cast<PacketInfo>(header), handler = detail->handler, packet = packetSpan]() {
+                    handler->deserialize(header, &packet);
                 }).detach();
                 
                 //detail->handler->deserialize(packetSpan.data(), packetSize);
