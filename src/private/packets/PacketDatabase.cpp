@@ -1,6 +1,7 @@
 #include "../../public/packets/PacketDatabase.h"
 
 #include "../../public/packets/PackeTable.h"
+#include "../../public/packets/receive/ActorInfo.h"
 
 PacketDatabase::PacketDatabase() {
     init();
@@ -540,9 +541,9 @@ void PacketDatabase::init()
     packet_map[PacketInfo::QUEST_ADD_1] = { .desc = "Quest Add", .size = 17, .type = PacketSizeType::FIXED_MIN, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::QUEST_UPDATE_MISSION_HUNT_2] = { .desc = "Quest Update Mission Hunt", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::PET_EVOLUTION_RESULT] = { .desc = "Pet Evolution Result", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr, .alert = true };
-    packet_map[PacketInfo::ACTOR_MOVED_8] = { .desc = "Actor Moved", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
-    packet_map[PacketInfo::ACTOR_CONNECTED_8] = { .desc = "Actor Connected", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
-    packet_map[PacketInfo::ACTOR_EXISTS_8] = { .desc = "Actor Exists", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
+    packet_map[PacketInfo::ACTOR_MOVED_8] = { .desc = "Actor Moved", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = const_cast<ActorInfo*>(&g_actor) };
+    packet_map[PacketInfo::ACTOR_CONNECTED_8] = { .desc = "Actor Connected", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = const_cast<ActorInfo*>(&g_actor) };
+    packet_map[PacketInfo::ACTOR_EXISTS_8] = { .desc = "Actor Exists", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = const_cast<ActorInfo*>(&g_actor) };
     packet_map[PacketInfo::HOTKEYS_2] = { .desc = "Hotkeys", .size = 3, .type = PacketSizeType::FIXED_MIN, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::RODEX_ADD_ITEM] = { .desc = "Rodex Add Item", .size = 53, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::RODEX_REMOVE_ITEM] = { .desc = "Rodex Remove Item", .size = 9, .type = PacketSizeType::FIXED, .handler = nullptr };

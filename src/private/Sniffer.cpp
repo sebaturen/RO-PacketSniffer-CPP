@@ -199,8 +199,8 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
     unsigned int payload_len = header->len - total_header_size;
     
     // DEBUG MODE
-    std::cout << "Comming: ";
-    debug_payload(payload, payload_len);
+    //std::cout << "Comming: ";
+    //debug_payload(payload, payload_len);
     //save_payload(payload, payload_len);
     // END DEBUG MODE
 
@@ -284,15 +284,13 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
                 debug_payload(m_buffer.data(), m_buffer.size());
             }
             lastKnowHeader = header;
-            log("[INFO] Deserializing packet. Header: " + hexStr(header) + " Size: " + std::to_string(packetSize));
-            std::span<const uint8_t> packetSpan{ m_buffer.data(), packetSize };
+            //log("[INFO] Deserializing packet. Header: " + hexStr(header) + " Size: " + std::to_string(packetSize));
+            std::vector<uint8_t> packetCopy{ m_buffer.begin(), m_buffer.begin() + packetSize };
             if (detail->handler)
             {
-                std::thread([header = static_cast<PacketInfo>(header), handler = detail->handler, packet = packetSpan]() {
-                    handler->deserialize(header, &packet);
+                std::thread([header = static_cast<PacketInfo>(header), handler = detail->handler, packet = packetCopy]() {
+                    handler->deserialize(&packet);
                 }).detach();
-                
-                //detail->handler->deserialize(packetSpan.data(), packetSize);
             }
             m_buffer.erase(m_buffer.begin(), m_buffer.begin() + packetSize);
         }
