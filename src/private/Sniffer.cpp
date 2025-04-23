@@ -269,6 +269,7 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
                 msg += " lastKnowHeader: " + hexStr(lastKnowHeader);
             }
             log(msg);
+            debug_payload(payload, payload_len);
             m_buffer.erase(m_buffer.begin());
             continue;
         }
@@ -326,10 +327,31 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
             std::vector<uint8_t> packetCopy{ m_buffer.begin(), m_buffer.begin() + packetSize };
             if (detail->handler)
             {
-                threads.emplace_back([header = static_cast<PacketInfo>(header), detail = detail, packet = packetCopy]() {
+                threads.emplace_back([detail = detail, packet = packetCopy]() {
                     std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
                     inHandler->deserialize(&packet);
                 });
+            }
+
+            // the minimum size packet detected is 6bytes, so packates have len < 6, are filling with 0x00
+            // to prevent errors and process un-existing packets, we can skip this content
+            if (payload_len == 6 && packetSize < m_buffer.size())
+            {
+                bool bCanSkip = true;
+                uint8_t zero_bytes = 0;
+                for (size_t i = packetSize; i < m_buffer.size(); i++)
+                {
+                    if (m_buffer[i] != 0x00)
+                    {
+                        bCanSkip = false;
+                        break;
+                    }
+                    zero_bytes++;
+                }
+                if (bCanSkip)
+                {
+                    packetSize += zero_bytes;
+                }
             }
             m_buffer.erase(m_buffer.begin(), m_buffer.begin() + packetSize);
         }

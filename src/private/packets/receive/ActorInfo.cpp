@@ -1,11 +1,10 @@
 #include "../../../public/packets/receive/ActorInfo.h"
 
-#include <iomanip>
 #include <nlohmann/json.hpp>
 
 namespace ActorInfoAPI
 {
-    constexpr const char* PLAYER_API_ENDPOINT = "player";
+    constexpr const char* PLAYER_API_ENDPOINT = "character";
     constexpr const char* MONSTER_API_ENDPOINT = "monster";
 }
 
@@ -24,8 +23,7 @@ void ActorInfo::deserialize_internal(const PacketInfo pk_header)
     }
     
     /**
-     * Base struct replicated from diferents packages
-     * `v C a4 a4 v3 V v2 V2`
+     * Packet structure:
     */
     actor_type = static_cast<ActorType>(pkt_data[0]);
     actor_id = pkt_data[1] | (pkt_data[2] << 8) | (pkt_data[3] << 16) | (pkt_data[4] << 24);
@@ -83,23 +81,27 @@ void ActorInfo::report_player()
         {"clothes_color_id", clothes_color_id}
     };
 
+    nlohmann::json guild_info = {
+        {"id", guild_id},
+        {"emblem_id", guild_emblem_id}
+    };
+
     nlohmann::json char_info = {
         {"job_id", type_id},
-        {"guild_id", guild_id},
-        {"guild_emblem_id", guild_emblem_id},
         {"sex", sex},
         {"level", level},
-        {"name", name}
+        {"name", string_to_hex(name) }
     };
 
     nlohmann::json data = {
         {"account_id", actor_id},
         {"character_id", character_id},
         {"info", char_info},
-        {"customization", customization}
+        {"customization", customization},
+        { "guild", guild_info }
     };
 
-    send_request(ActorInfoAPI::PLAYER_API_ENDPOINT, data);
+    send_request(ActorInfoAPI::PLAYER_API_ENDPOINT, data.dump());
 }
 
 void ActorInfo::report_monster()

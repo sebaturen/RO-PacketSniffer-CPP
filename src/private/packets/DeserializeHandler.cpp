@@ -1,4 +1,5 @@
 #include "../../public/packets/DeserializeHandler.h"
+
 #include <iomanip>
 #include <iostream>
 #include <curl/curl.h>
@@ -46,7 +47,16 @@ void DeserializeHandler::debug_packet() const
     std::cout << "]" << std::dec << std::endl;
 }
 
-void DeserializeHandler::send_request(const std::string& endpoint, const nlohmann::json& data)
+std::string DeserializeHandler::string_to_hex(const std::string& input)
+{
+    std::ostringstream oss;
+    for (unsigned char c : input) {
+        oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(c);
+    }
+    return oss.str();
+}
+
+void DeserializeHandler::send_request(const std::string& endpoint, const std::string& data)
 {
     if (!app_config.contains("api"))
     {
@@ -70,14 +80,15 @@ void DeserializeHandler::send_request(const std::string& endpoint, const nlohman
         headers = curl_slist_append(headers, "Content-Type: application/json");
         
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.dump().c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data.size());
+        curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, data.c_str());
 
         // DEBUG MODE
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, +[](char* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
+        /*curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, +[](char* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
             std::cout << std::string(ptr, size * nmemb);
             return size * nmemb;
-        });
+        });*/
 
         res = curl_easy_perform(curl);
 

@@ -23,7 +23,9 @@ protected:
     
     void debug_packet() const;
 
-    static void send_request(const std::string& endpoint, const nlohmann::json& data);
+    static std::string string_to_hex(const std::string& input);
+
+    static void send_request(const std::string& endpoint, const std::string& data);
     
     std::span<const uint8_t> pkt_data;
 

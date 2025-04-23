@@ -6,8 +6,6 @@
 #include <nlohmann/json.hpp>
 #include <pcap/pcap.h>
 
-#include "packets/PacketDatabase.h"
-
 class Sniffer {
 public:
     Sniffer();

@@ -1,6 +1,5 @@
 # base libs~~~~~~~~~~~~~
 find_package(CURL CONFIG REQUIRED)
-message("finded!")
 # npcap lib~
 set(NPCAP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/external/libpcap/include")
 set(NPCAP_LIB_DIR "${CMAKE_SOURCE_DIR}/libs/external/libpcap/lib/x64")
