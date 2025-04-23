@@ -470,3 +470,4 @@ FodyWeavers.xsd
 .idea/*
 build/*
 !libs/external/libpcap/lib/*.lib
+saved_packets/*

@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "DeserializeHandler.h"
 #include "PackeTable.h"
 
 class DeserializeHandler;
@@ -21,7 +22,7 @@ struct packet_detail
     std::string desc;
     int16_t size;
     PacketSizeType type;
-    DeserializeHandler* handler;
+    HandlerFactory handler;
     bool alert = false;
 };
 

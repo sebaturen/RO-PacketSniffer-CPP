@@ -5,26 +5,54 @@
 
 #include "public/Sniffer.h"
 
-void test_pack_file(const std::string& filename);
+void capture(bool save = false);
+void reproduce(const std::string& filename);
 
-int main() {
-    std::vector<std::string> ip_list =
+int main(int argc, char* argv[])
+{
+    std::cout << "RO Sniffer" << std::endl;
+    if (argc < 2)
     {
-        // login server
-        "35.199.111.15",
-        // map server
-        "35.198.41.33", // prontera - map
-        "34.95.145.188", // prontera -inn
-    };
-    Sniffer sniffer;
-    sniffer.start_capture(ip_list);
-    //test_pack_file("log_packets.txt");
+        capture();
+    }
+    
+    for (int i = 1; i < argc; ++i)
+    {
+        std::string arg = argv[i];
+
+        if (arg == "--save")
+        {
+            capture(true);
+        }
+        else if (arg == "--reproduce")
+        {
+            if (argv[i + 1] == nullptr)
+            {
+                std::cerr << "Usage: --reproduce <filename>" << std::endl;
+                return 1;
+            }
+            reproduce(argv[i+1]);
+        }
+        else
+        {
+            std::cerr << "Usage: " << argv[0] << " [--save] [--reproduce <filename>]" << std::endl;
+            return 1;
+        }
+    }
     return 0;
 }
 
-void test_pack_file(const std::string& filename) {
+void capture(bool save)
+{
+    Sniffer sniffer;
+    sniffer.start_capture(save);
+}
+
+void reproduce(const std::string& filename)
+{
     std::ifstream file(filename);
-    if (!file) {
+    if (!file)
+    {
         std::cerr << "Can't open file: " << filename << std::endl;
         return;
     }
@@ -33,16 +61,21 @@ void test_pack_file(const std::string& filename) {
     std::string lineStr;
     int lineNumber = 1;
 
-    while (std::getline(file, lineStr)) {
+    while (std::getline(file, lineStr))
+    {
         std::istringstream iss(lineStr);
         std::string byteStr;
         std::vector<uint8_t> lineBytes;
 
-        while (iss >> byteStr) {
-            try {
+        while (iss >> byteStr)
+        {
+            try
+            {
                 uint8_t byte = static_cast<uint8_t>(std::stoul(byteStr, nullptr, 16));
                 lineBytes.push_back(byte);
-            } catch (const std::exception& e) {
+            }
+            catch (const std::exception& e)
+            {
                 std::cerr << "Error convert '" << byteStr << "' in line " << lineNumber << ": " << e.what() << std::endl;
             }
         }
@@ -50,7 +83,7 @@ void test_pack_file(const std::string& filename) {
         // To test
         u_char* char_ptr = reinterpret_cast<u_char*>(lineBytes.data());
         sniffer.self_test(char_ptr, lineBytes.size());
-        std::cout << "Packet " << lineNumber << " ------------- " << std::endl;
+        //std::cout << "Packet " << lineNumber << " ------------- " << std::endl;
 
         ++lineNumber;
     }

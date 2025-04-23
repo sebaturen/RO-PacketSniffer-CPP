@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "../DeserializeHandler.h"
 
 enum class ActorType : int8_t
@@ -17,15 +19,27 @@ public:
 
 private:
 
-    void actor_connected();
-    void actor_moved();
-    void actor_exists();
+    void report_player();
+    void report_monster();
 
     // Actor info
     ActorType actor_type = ActorType::UNKNOWN;
-    uint16_t account_id = 0;
-    uint16_t character_id = 0;
-    uint8_t job_id = 0;
+    uint32_t actor_id = 0; // [MonsterMapId for monsters] or [Account ID for player]
+    uint32_t character_id = 0;
+    uint32_t type_id = 0; // [MonsterId for monster] or [JobId for player]
+    uint32_t hair_style_id = 0;
+    uint32_t weapon_id = 0;
+    uint32_t shield_id = 0;
+    uint32_t low_head_id = 0;
+    uint32_t top_head_id = 0;
+    uint32_t mid_head_id = 0;
+    uint32_t hair_color_id = 0;
+    uint32_t clothes_color_id = 0;
+    uint32_t guild_id = 0;
+    uint32_t guild_emblem_id = 0;
+    uint32_t sex = 0;
+    uint32_t coord_x = 0;
+    uint32_t coord_y = 0;
+    uint32_t level = 0;
+    std::string name;
 };
-
-static const ActorInfo g_actor;

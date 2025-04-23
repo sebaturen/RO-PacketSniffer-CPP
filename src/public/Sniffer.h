@@ -1,22 +1,24 @@
 #pragma once
 
 #include <string>
+#include <thread>
 #include <vector>
+#include <nlohmann/json.hpp>
 #include <pcap/pcap.h>
 
 #include "packets/PacketDatabase.h"
 
 class Sniffer {
 public:
-    Sniffer() =default;
+    Sniffer();
     ~Sniffer();
 
-    void start_capture(const std::vector<std::string>& ip_capture);
+    void start_capture(bool save = false);
     void stop_capture();
     void self_test(const u_char* payload, const unsigned int payload_len );
 
 private:
-    static pcap_if_t* get_capture_device();
+    pcap_if_t* get_capture_device();
     static std::string select_capture_device(const pcap_if_t* all_devs);
     static void save_payload(const u_char* payload, unsigned int payload_len);
     static void packet_handler(u_char* param, const pcap_pkthdr* header, const u_char* pkt_data);
@@ -32,8 +34,13 @@ private:
     bool apply_filter(const std::string& filterExpression) const;
     
     pcap_t *handle;
+    nlohmann::json config;
     pcap_if_t* capture_device = nullptr;
+    inline static u_int64 m_packet_count = 0;
     static std::vector<u_char> m_buffer;
+    static std::vector<std::thread> threads;
+    inline static bool bSaveCapture = false;
+    
     inline static bool bDebugMode = true;
     inline static uint16_t lastKnowHeader = 0;
 

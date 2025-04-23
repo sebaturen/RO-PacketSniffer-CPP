@@ -16,17 +16,45 @@ namespace SnifferSpace
     constexpr static int ETHERNET_HEADER_LEN = 14;
     constexpr static int TCP = 6;
     constexpr static int UDP = 17;
+    
+    static std::vector<std::string> ro_latam_ip_list =
+    {
+        // login server
+        "35.199.111.15",
+        // map server
+        "35.198.41.33", // prontera - map
+        "34.95.145.188", // prontera -inn
+    };
 }
 
 std::vector<u_char> Sniffer::m_buffer;
+std::vector<std::thread> Sniffer::threads;
+
+Sniffer::Sniffer()
+{    
+    std::ifstream config_file("config.json");
+    if (!config_file)
+    {
+        std::ofstream out_config_file("config.json");
+        config = nlohmann::json::object();
+        out_config_file << config.dump(4);
+    }
+    else
+    {
+        config_file >> config;
+    }
+    DeserializeHandler::set_app_config(config);
+}
 
 Sniffer::~Sniffer()
 {
     stop_capture();
 }
 
-void Sniffer::start_capture(const std::vector<std::string>& ip_capture)
+void Sniffer::start_capture(bool save)
 {
+    std::vector<std::string> ip_capture = SnifferSpace::ro_latam_ip_list;
+    bSaveCapture = save;
     // Set device~
     capture_device = get_capture_device();
     if (!capture_device)
@@ -84,6 +112,12 @@ void Sniffer::stop_capture()
         pcap_freealldevs(capture_device);
         capture_device = nullptr;
     }
+    
+    for (auto& t : threads) {
+        if (t.joinable()) {
+            t.join();
+        }
+    }
 }
 
 void Sniffer::self_test(const u_char* payload, const unsigned int payload_len )
@@ -100,13 +134,11 @@ pcap_if_t* Sniffer::get_capture_device()
         std::cerr << "Error finding devices: %s" << err_buf << '\n';
         return nullptr;
     }
-
-    nlohmann::json config;
-    std::string device_name;
-    std::ifstream config_file("config.json");
-    if (!config_file)
-    {
-        std::cout << "No config.json found. Select net devices:" << '\n';
+    
+    std::string device_name;    
+    if (!config.contains("device_id"))
+    {        
+        std::cout << "Select net devices:" << '\n';
         device_name = select_capture_device(all_devs);
 
         config["device_id"] = device_name;
@@ -115,7 +147,6 @@ pcap_if_t* Sniffer::get_capture_device()
     }
     else
     {
-        config_file >> config;
         device_name = config.value("device_id", "NONE");
     }
 
@@ -171,12 +202,14 @@ void Sniffer::save_payload(const u_char* payload, unsigned int payload_len)
     std::ofstream outFile("log_packets.txt", std::ios::app);
 
     for (size_t i = 0; i < payload_len; ++i) {
-        outFile << std::hex << std::uppercase   // salida en mayúscula (opcional)
-                << std::setw(2) << std::setfill('0') // rellenar con 0 si es necesario
+        outFile << std::hex << std::uppercase
+                << std::setw(2) << std::setfill('0')
                 << static_cast<int>(payload[i]) << " ";
     }
     outFile << std::endl;
     outFile.close();
+
+    std::cout << "\rPacket Count: " << m_packet_count << std::flush;
 }
 
 void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_char* pkt_data)
@@ -198,12 +231,17 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
     int total_header_size = SnifferSpace::ETHERNET_HEADER_LEN + ip_header_len + transport_header_len;
     unsigned int payload_len = header->len - total_header_size;
     
-    // DEBUG MODE
-    //std::cout << "Comming: ";
-    //debug_payload(payload, payload_len);
-    //save_payload(payload, payload_len);
-    // END DEBUG MODE
+    if (bDebugMode)
+    {
+        std::cout << "Coming: ";
+        debug_payload(payload, payload_len);        
+    }
 
+    if (bSaveCapture)
+    {
+        m_packet_count++;
+        save_payload(payload, payload_len);
+    }
     processIncomingData(payload, payload_len);
 }
 
@@ -288,9 +326,10 @@ void Sniffer::processIncomingData(const u_char* payload, const unsigned int payl
             std::vector<uint8_t> packetCopy{ m_buffer.begin(), m_buffer.begin() + packetSize };
             if (detail->handler)
             {
-                std::thread([header = static_cast<PacketInfo>(header), handler = detail->handler, packet = packetCopy]() {
-                    handler->deserialize(&packet);
-                }).detach();
+                threads.emplace_back([header = static_cast<PacketInfo>(header), detail = detail, packet = packetCopy]() {
+                    std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
+                    inHandler->deserialize(&packet);
+                });
             }
             m_buffer.erase(m_buffer.begin(), m_buffer.begin() + packetSize);
         }

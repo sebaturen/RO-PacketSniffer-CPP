@@ -1,44 +1,115 @@
 #include "../../../public/packets/receive/ActorInfo.h"
 
-#include <iostream>
+#include <iomanip>
+#include <nlohmann/json.hpp>
+
+namespace ActorInfoAPI
+{
+    constexpr const char* PLAYER_API_ENDPOINT = "player";
+    constexpr const char* MONSTER_API_ENDPOINT = "monster";
+}
 
 void ActorInfo::deserialize_internal(const PacketInfo pk_header)
 {
+    int8_t offset_one = 0;
+    int8_t offset_two = 0;
+    if (pk_header == PacketInfo::ACTOR_CONNECTED_8)
+    {
+        offset_two = -1;
+    }
+    if (pk_header == PacketInfo::ACTOR_MOVED_8)
+    {
+        offset_one = 4;
+        offset_two = 6;
+    }
+    
     /**
      * Base struct replicated from diferents packages
      * `v C a4 a4 v3 V v2 V2`
     */
-    actor_type = static_cast<ActorType>(pkt_data[read_position++]);
-    account_id = pkt_data[read_position++] | (pkt_data[read_position++] << 8) | (pkt_data[read_position++] << 16) | (pkt_data[read_position++] << 24);
-    character_id = pkt_data[read_position++] | (pkt_data[read_position++] << 8) | (pkt_data[read_position++] << 16) | (pkt_data[read_position++] << 24);
-    read_position = 18; // Skip to byte 18, start job position
-    job_id = pkt_data[read_position++] | (pkt_data[read_position++] << 8);
+    actor_type = static_cast<ActorType>(pkt_data[0]);
+    actor_id = pkt_data[1] | (pkt_data[2] << 8) | (pkt_data[3] << 16) | (pkt_data[4] << 24);
+    character_id = pkt_data[5] | (pkt_data[6] << 8) | (pkt_data[7] << 16) | (pkt_data[8] << 24);
     
-    if (pk_header == PacketInfo::ACTOR_EXISTS_8)
+    type_id = pkt_data[19] | (pkt_data[20] << 8);
+    hair_style_id = pkt_data[21] | (pkt_data[22] << 8);
+    weapon_id = pkt_data[23] | (pkt_data[24] << 8) | (pkt_data[25] << 16) | (pkt_data[26] << 24);
+    shield_id = pkt_data[27] | (pkt_data[28] << 8) | (pkt_data[29] << 16) | (pkt_data[30] << 24);
+    low_head_id = pkt_data[31] | (pkt_data[32] << 8);
+    top_head_id = pkt_data[33 + offset_one] | (pkt_data[34 + offset_one] << 8);
+    mid_head_id = pkt_data[35 + offset_one] | (pkt_data[36 + offset_one] << 8);
+    hair_color_id = pkt_data[37 + offset_one] | (pkt_data[38 + offset_one] << 8);
+    clothes_color_id = pkt_data[39 + offset_one] | (pkt_data[40 + offset_one] << 8);
+    
+    guild_id = pkt_data[45 + offset_one] | (pkt_data[46 + offset_one] << 8) | (pkt_data[47 + offset_one] << 16) | (pkt_data[48 + offset_one] << 24);
+    guild_emblem_id = pkt_data[49 + offset_one] | (pkt_data[50 + offset_one] << 8) | (pkt_data[51 + offset_one] << 16) | (pkt_data[52 + offset_one] << 24);
+    sex = pkt_data[58 + offset_one];
+
+    /*uint32_t coords = 0; little endian
+    coords |= static_cast<uint32_t>(pkt_data[59 + offset_one]);
+    coords |= static_cast<uint32_t>(pkt_data[59 + offset_one + 1]) << 8;
+    coords |= static_cast<uint32_t>(pkt_data[59 + offset_one + 2]) << 16;*/
+    
+    uint32_t coords = 0; // big endian
+    coords |= static_cast<uint32_t>(pkt_data[59 + offset_one])     << 16;
+    coords |= static_cast<uint32_t>(pkt_data[59 + offset_one + 1]) << 8;
+    coords |= static_cast<uint32_t>(pkt_data[59 + offset_one + 2]);
+    coord_x = coords >> 14;
+    coord_y = (coords >> 4) & 0x3FF;
+    
+    level = pkt_data[65 + offset_two] | (pkt_data[66 + offset_two] << 8) | (pkt_data[67 + offset_two] << 16) | (pkt_data[68 + offset_two] << 24);    
+    name = std::string(reinterpret_cast<const char*>(pkt_data.data() + (80 + offset_two)), pkt_data.size() - (80 + offset_two));
+
+    if (actor_type == ActorType::PLAYER)
     {
-        actor_exists();
+        report_player();
     }
-    if (pk_header == PacketInfo::ACTOR_CONNECTED_8)
+    if (actor_type == ActorType::MONSTER)
     {
-        actor_connected();
+        report_monster();
     }
-    if (pk_header == PacketInfo::ACTOR_MOVED_8)
-    {
-        actor_moved();
-    }    
 }
 
-void ActorInfo::actor_connected()
+void ActorInfo::report_player()
 {
-    
+    nlohmann::json customization = {
+        {"hair_style_id", hair_style_id},
+        {"hair_color_id", hair_color_id},
+        {"weapon_id", weapon_id},
+        {"shield_id", shield_id},
+        {"top_head_id", top_head_id},
+        {"mid_head_id", mid_head_id},
+        {"low_head_id", low_head_id},
+        {"clothes_color_id", clothes_color_id}
+    };
+
+    nlohmann::json char_info = {
+        {"job_id", type_id},
+        {"guild_id", guild_id},
+        {"guild_emblem_id", guild_emblem_id},
+        {"sex", sex},
+        {"level", level},
+        {"name", name}
+    };
+
+    nlohmann::json data = {
+        {"account_id", actor_id},
+        {"character_id", character_id},
+        {"info", char_info},
+        {"customization", customization}
+    };
+
+    send_request(ActorInfoAPI::PLAYER_API_ENDPOINT, data);
 }
 
-void ActorInfo::actor_moved()
+void ActorInfo::report_monster()
 {
-    
-}
+    nlohmann::json data = {
+        {"id", type_id},
+        {"level", level},
+        {"coord_x", coord_x},
+        {"coord_y", coord_y}
+    };
 
-void ActorInfo::actor_exists()
-{
-    
+    //... send_request(data); <-- TODO: get map!
 }

@@ -1,7 +1,17 @@
 #include "../../public/packets/DeserializeHandler.h"
-
 #include <iomanip>
 #include <iostream>
+#include <curl/curl.h>
+#include <nlohmann/json.hpp>
+
+#include "../../public/packets/PacketDatabase.h"
+
+nlohmann::json DeserializeHandler::app_config;
+
+void DeserializeHandler::set_app_config(const nlohmann::json& in_app_config)
+{
+    app_config = in_app_config;
+}
 
 void DeserializeHandler::deserialize(const std::vector<uint8_t>* data)
 {
@@ -34,4 +44,48 @@ void DeserializeHandler::debug_packet() const
                   << static_cast<int>(i) << " ";
     }
     std::cout << "]" << std::dec << std::endl;
+}
+
+void DeserializeHandler::send_request(const std::string& endpoint, const nlohmann::json& data)
+{
+    if (!app_config.contains("api"))
+    {
+        std::cout << "[INFO] API not enabled. Skipping request." << std::endl;
+        return;
+    }
+
+    if (!app_config["api"].contains("url") || !app_config["api"].contains("key"))
+    {
+        std::cout << "[INFO] API URL or key not set. Skipping request." << std::endl;
+        return;
+    }
+    
+    CURL* curl = curl_easy_init();
+    if (curl)
+    {
+        CURLcode res;
+        const std::string url = std::format("{}/{}", std::string(app_config["api"]["url"]), endpoint);
+        //url += "/"+ endpoint;
+        struct curl_slist* headers = nullptr;
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+        
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.dump().c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+        // DEBUG MODE
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, +[](char* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
+            std::cout << std::string(ptr, size * nmemb);
+            return size * nmemb;
+        });
+
+        res = curl_easy_perform(curl);
+
+        if (res != CURLE_OK) {
+            std::cerr << "Error in curl_easy_perform(): " << curl_easy_strerror(res) << '\n';
+        }
+
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+    }
 }
