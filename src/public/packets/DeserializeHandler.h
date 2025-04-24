@@ -5,6 +5,7 @@
 #include <span>
 #include <vector>
 #include <nlohmann/json_fwd.hpp>
+#include <ctpl_stl.h>
 
 #include "PackeTable.h"
 
@@ -32,6 +33,7 @@ protected:
 private:
 
     static nlohmann::json app_config;
+    static ctpl::thread_pool curl_pool;
 };
 
 using HandlerFactory = std::function<std::unique_ptr<DeserializeHandler>()>;

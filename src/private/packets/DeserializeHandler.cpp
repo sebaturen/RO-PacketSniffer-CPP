@@ -8,6 +8,7 @@
 #include "../../public/packets/PacketDatabase.h"
 
 nlohmann::json DeserializeHandler::app_config;
+ctpl::thread_pool DeserializeHandler::curl_pool(10);
 
 void DeserializeHandler::set_app_config(const nlohmann::json& in_app_config)
 {
@@ -69,34 +70,38 @@ void DeserializeHandler::send_request(const std::string& endpoint, const std::st
         std::cout << "[INFO] API URL or key not set. Skipping request." << std::endl;
         return;
     }
-    
-    CURL* curl = curl_easy_init();
-    if (curl)
+
+    curl_pool.push([=](int)
     {
-        CURLcode res;
-        const std::string url = std::format("{}/{}", std::string(app_config["api"]["url"]), endpoint);
-        //url += "/"+ endpoint;
-        struct curl_slist* headers = nullptr;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-        
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data.size());
-        curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, data.c_str());
+        CURL* curl = curl_easy_init();
+        if (curl)
+        {
+            CURLcode res;
+            const std::string url = std::format("{}/{}", std::string(app_config["api"]["url"]), endpoint);
+            //url += "/"+ endpoint;
+            struct curl_slist* headers = nullptr;
+            headers = curl_slist_append(headers, "Content-Type: application/json");
 
-        // DEBUG MODE
-        /*curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, +[](char* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
-            std::cout << std::string(ptr, size * nmemb);
-            return size * nmemb;
-        });*/
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data.size());
+            curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, data.c_str());
 
-        res = curl_easy_perform(curl);
+            // DEBUG MODE
+            /*curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, +[](char* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
+                std::cout << std::string(ptr, size * nmemb);
+                return size * nmemb;
+            });*/
 
-        if (res != CURLE_OK) {
-            std::cerr << "Error in curl_easy_perform(): " << curl_easy_strerror(res) << '\n';
+            res = curl_easy_perform(curl);
+
+            if (res != CURLE_OK)
+            {
+                std::cerr << "Error in curl_easy_perform(): " << curl_easy_strerror(res) << '\n';
+            }
+
+            curl_slist_free_all(headers);
+            curl_easy_cleanup(curl);
         }
-
-        curl_slist_free_all(headers);
-        curl_easy_cleanup(curl);
-    }
+    });
 }

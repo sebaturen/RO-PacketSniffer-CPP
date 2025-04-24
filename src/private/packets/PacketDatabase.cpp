@@ -569,7 +569,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::OPEN_STORE_STATUS] = { .desc = "Open Store Status", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::SHOW_EQ_4] = { .desc = "Show Eq", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::CHANGE_TITLE] = { .desc = "Change Title", .size = 7, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::ACTOR_INFO_2] = { .desc = "Actor Info", .size = 106, .type = PacketSizeType::FIXED, .handler = nullptr };
+    packet_map[PacketInfo::ACTOR_INFO_2] = { .desc = "Actor Info", .size = 106, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ActorInfo>(); } };
     packet_map[PacketInfo::SENBEI_AMOUNT] = { .desc = "Senbei Amount", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::MONSTER_HP_INFO_TINY] = { .desc = "Monster Hp Info Tiny", .size = 7, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::INVENTORY_ITEM_ADDED_5] = { .desc = "Inventory Item Added", .size = 69, .type = PacketSizeType::FIXED, .handler = nullptr };

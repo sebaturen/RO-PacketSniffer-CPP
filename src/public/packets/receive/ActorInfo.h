@@ -19,8 +19,14 @@ public:
 
 private:
 
+    void deserialize_extended(const PacketInfo pk_header);
+    void deserialize_minimal();
+
+    uint8_t get_name_size(uint8_t start_position) const;
+    
     void report_player();
     void report_monster();
+    void report_player_minimal();
 
     // Actor info
     ActorType actor_type = ActorType::UNKNOWN;
@@ -41,5 +47,9 @@ private:
     uint32_t coord_x = 0;
     uint32_t coord_y = 0;
     uint32_t level = 0;
+    
     std::string name;
+    std::string party_name;
+    std::string guild_name;
+    std::string guild_title;
 };

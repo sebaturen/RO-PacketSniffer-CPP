@@ -2,3 +2,6 @@
 	path = libs/external/json
 	url = https://github.com/nlohmann/json.git
 	branch = master
+[submodule "libs/external/ctpl"]
+	path = libs/external/ctpl
+	url = https://github.com/vit-vit/CTPL

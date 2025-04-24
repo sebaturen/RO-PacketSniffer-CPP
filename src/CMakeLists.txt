@@ -3,6 +3,7 @@ find_package(CURL CONFIG REQUIRED)
 # npcap lib~
 set(NPCAP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/external/libpcap/include")
 set(NPCAP_LIB_DIR "${CMAKE_SOURCE_DIR}/libs/external/libpcap/lib/x64")
+set(CTPL_INCLUDE_DIR  "${CMAKE_SOURCE_DIR}/libs/external/ctpl")
 
 set(EXTERNAL_LIBS
     "${NPCAP_LIB_DIR}/wpcap.lib"
@@ -10,6 +11,7 @@ set(EXTERNAL_LIBS
 )
 set(EXTERNAL_INCLUDES
 	"${NPCAP_INCLUDE_DIR}"
+	"${CTPL_INCLUDE_DIR}"
 )
 include_directories(${EXTERNAL_INCLUDES})
 

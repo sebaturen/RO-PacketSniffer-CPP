@@ -5,10 +5,29 @@
 namespace ActorInfoAPI
 {
     constexpr const char* PLAYER_API_ENDPOINT = "character";
+    constexpr const char* PARTY_GUILD_API_ENDPOINT = "party_guild";
     constexpr const char* MONSTER_API_ENDPOINT = "monster";
 }
 
 void ActorInfo::deserialize_internal(const PacketInfo pk_header)
+{
+    if (pk_header == PacketInfo::ACTOR_MOVED_8 ||
+        pk_header == PacketInfo::ACTOR_CONNECTED_8 || 
+        pk_header == PacketInfo::ACTOR_EXISTS_8)
+    {
+        deserialize_extended(pk_header);
+    }
+    
+    if (pk_header == PacketInfo::ACTOR_INFO_2)
+    {
+        deserialize_minimal();
+    }
+}
+
+/*
+ * Contain a extended version of the actor info packet.
+ */
+void ActorInfo::deserialize_extended(const PacketInfo pk_header)
 {
     int8_t offset_one = 0;
     int8_t offset_two = 0;
@@ -68,6 +87,44 @@ void ActorInfo::deserialize_internal(const PacketInfo pk_header)
     }
 }
 
+/*
+ * Small version of actor, use only for players, and containe:
+ *  - Name
+ *  - PartyName
+ *  - GuildName
+ *  - GuildTitle
+ *  - TitleId
+ */
+void ActorInfo::deserialize_minimal()
+{
+    actor_id = pkt_data[0] | (pkt_data[1] << 8) | (pkt_data[2] << 16) | (pkt_data[3] << 24);
+    uint8_t name_size = get_name_size(4);
+    uint8_t party_name_size = get_name_size(28);
+    uint8_t guild_name_size = get_name_size(52);
+    uint8_t guild_title_size = get_name_size(76);
+    
+    name = std::string(reinterpret_cast<const char*>(pkt_data.data() + 4), pkt_data.size() - name_size);
+    party_name = std::string(reinterpret_cast<const char*>(pkt_data.data() + 28), pkt_data.size() - party_name_size);
+    guild_name = std::string(reinterpret_cast<const char*>(pkt_data.data() + 52), pkt_data.size() - guild_name_size);
+    guild_title = std::string(reinterpret_cast<const char*>(pkt_data.data() + 76), pkt_data.size() - guild_title_size);
+
+    report_player_minimal();
+}
+
+uint8_t ActorInfo::get_name_size(uint8_t start_position) const
+{
+    uint8_t name_size = 0;
+    for (uint8_t i = 0; i < 24; i++)
+    {
+        if (pkt_data[start_position + i] == 0)
+        {
+            name_size = i+start_position;
+            break;
+        }
+    }
+    return name_size;
+}
+
 void ActorInfo::report_player()
 {
     nlohmann::json customization = {
@@ -114,4 +171,17 @@ void ActorInfo::report_monster()
     };
 
     //... send_request(data); <-- TODO: get map!
+}
+
+void ActorInfo::report_player_minimal()
+{
+    nlohmann::json data = {
+        {"account_id", actor_id},
+        {"name", string_to_hex(name) },
+        {"party_name", string_to_hex(party_name) },
+        {"guild_name", string_to_hex(guild_name) },
+        {"guild_title", string_to_hex(guild_title) }
+    };
+
+    send_request(ActorInfoAPI::PARTY_GUILD_API_ENDPOINT, data.dump());
 }
