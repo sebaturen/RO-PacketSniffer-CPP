@@ -8,7 +8,7 @@
 #include "../../public/packets/PacketDatabase.h"
 
 nlohmann::json DeserializeHandler::app_config;
-ctpl::thread_pool DeserializeHandler::curl_pool(10);
+ctpl::thread_pool DeserializeHandler::curl_pool(5);
 
 void DeserializeHandler::set_app_config(const nlohmann::json& in_app_config)
 {
@@ -70,7 +70,7 @@ void DeserializeHandler::send_request(const std::string& endpoint, const std::st
         std::cout << "[INFO] API URL or key not set. Skipping request." << std::endl;
         return;
     }
-
+    
     curl_pool.push([=](int)
     {
         CURL* curl = curl_easy_init();
@@ -78,7 +78,7 @@ void DeserializeHandler::send_request(const std::string& endpoint, const std::st
         {
             CURLcode res;
             const std::string url = std::format("{}/{}", std::string(app_config["api"]["url"]), endpoint);
-            //url += "/"+ endpoint;
+            std::string response_string;
             struct curl_slist* headers = nullptr;
             headers = curl_slist_append(headers, "Content-Type: application/json");
 
@@ -86,12 +86,10 @@ void DeserializeHandler::send_request(const std::string& endpoint, const std::st
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data.size());
             curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, data.c_str());
-
-            // DEBUG MODE
-            /*curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, +[](char* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
-                std::cout << std::string(ptr, size * nmemb);
-                return size * nmemb;
-            });*/
+            
+            // Set write function to capture response
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, DeserializeHandler::write_callback);
 
             res = curl_easy_perform(curl);
 
@@ -104,4 +102,11 @@ void DeserializeHandler::send_request(const std::string& endpoint, const std::st
             curl_easy_cleanup(curl);
         }
     });
+}
+
+size_t DeserializeHandler::write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
+{
+    auto& response = *static_cast<std::string*>(userdata);
+    response.append(ptr, size * nmemb);
+    return size * nmemb;
 }

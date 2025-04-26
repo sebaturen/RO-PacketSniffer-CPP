@@ -21,8 +21,6 @@ private:
 
     void deserialize_extended(const PacketInfo pk_header);
     void deserialize_minimal();
-
-    uint8_t get_name_size(uint8_t start_position) const;
     
     void report_player();
     void report_monster();

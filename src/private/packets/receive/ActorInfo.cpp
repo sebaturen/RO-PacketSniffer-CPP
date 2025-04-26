@@ -98,31 +98,13 @@ void ActorInfo::deserialize_extended(const PacketInfo pk_header)
 void ActorInfo::deserialize_minimal()
 {
     actor_id = pkt_data[0] | (pkt_data[1] << 8) | (pkt_data[2] << 16) | (pkt_data[3] << 24);
-    uint8_t name_size = get_name_size(4);
-    uint8_t party_name_size = get_name_size(28);
-    uint8_t guild_name_size = get_name_size(52);
-    uint8_t guild_title_size = get_name_size(76);
     
-    name = std::string(reinterpret_cast<const char*>(pkt_data.data() + 4), pkt_data.size() - name_size);
-    party_name = std::string(reinterpret_cast<const char*>(pkt_data.data() + 28), pkt_data.size() - party_name_size);
-    guild_name = std::string(reinterpret_cast<const char*>(pkt_data.data() + 52), pkt_data.size() - guild_name_size);
-    guild_title = std::string(reinterpret_cast<const char*>(pkt_data.data() + 76), pkt_data.size() - guild_title_size);
+    name         = std::string(reinterpret_cast<const char*>(pkt_data.data() + 4));
+    party_name   = std::string(reinterpret_cast<const char*>(pkt_data.data() + 28));
+    guild_name   = std::string(reinterpret_cast<const char*>(pkt_data.data() + 52));
+    guild_title  = std::string(reinterpret_cast<const char*>(pkt_data.data() + 76));
 
     report_player_minimal();
-}
-
-uint8_t ActorInfo::get_name_size(uint8_t start_position) const
-{
-    uint8_t name_size = 0;
-    for (uint8_t i = 0; i < 24; i++)
-    {
-        if (pkt_data[start_position + i] == 0)
-        {
-            name_size = i+start_position;
-            break;
-        }
-    }
-    return name_size;
 }
 
 void ActorInfo::report_player()
@@ -178,8 +160,8 @@ void ActorInfo::report_player_minimal()
     nlohmann::json data = {
         {"account_id", actor_id},
         {"name", string_to_hex(name) },
-        {"party_name", string_to_hex(party_name) },
-        {"guild_name", string_to_hex(guild_name) },
+        {"party", string_to_hex(party_name) },
+        {"guild", string_to_hex(guild_name) },
         {"guild_title", string_to_hex(guild_title) }
     };
 

@@ -31,7 +31,9 @@ protected:
     std::span<const uint8_t> pkt_data;
 
 private:
-
+    
+    static size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata);
+    
     static nlohmann::json app_config;
     static ctpl::thread_pool curl_pool;
 };
