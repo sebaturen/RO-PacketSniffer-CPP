@@ -2,6 +2,7 @@
 
 #include "../../public/packets/PackeTable.h"
 #include "../../public/packets/receive/ActorInfo.h"
+#include "../../public/packets/receive/Exp.h"
 
 PacketDatabase::PacketDatabase() {
     init();
@@ -361,7 +362,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::INSTANCE_WINDOW_START] = { .desc = "Instance Window Start", .size = 65, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::INSTANCE_WINDOW_QUEUE] = { .desc = "Instance Window Queue", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::INSTANCE_WINDOW_JOIN] = { .desc = "Instance Window Join", .size = 71, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::INSTANCE_WINDOW_LEAVE] = { .desc = "Instance Window Leave", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
+    packet_map[PacketInfo::INSTANCE_WINDOW_LEAVE] = { .desc = "Instance Window Leave", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::INVENTORY_ITEMS_NONSTACKABLE_2] = { .desc = "Inventory Items Nonstackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::STORAGE_ITEMS_NONSTACKABLE_2] = { .desc = "Storage Items Nonstackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::CART_ITEMS_NONSTACKABLE_2] = { .desc = "Cart Items Nonstackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -624,7 +625,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::ACCOUNT_SERVER_INFO_3] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::ERRORS_1] = { .desc = "Errors", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::STAT_INFO_7] = { .desc = "Stat Info", .size = 12, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::EXP_1] = { .desc = "Exp", .size = 18, .type = PacketSizeType::FIXED, .handler = nullptr };
+    packet_map[PacketInfo::EXP_1] = { .desc = "Exp", .size = 18, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<Exp>(); } };
     packet_map[PacketInfo::LOGIN_ERROR_2] = { .desc = "Login Error", .size = 23, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::REFINE_STATUS] = { .desc = "Refine Status", .size = 32, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::MISC_CONFIG_2] = { .desc = "Misc Config", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
