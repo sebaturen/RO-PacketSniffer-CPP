@@ -27,7 +27,7 @@ namespace SnifferSpace
     };
 }
 
-std::vector<u_char> Sniffer::m_buffer;
+std::unordered_map<uint16_t, std::vector<u_char>> Sniffer::m_buffer_map;
 std::vector<std::thread> Sniffer::threads;
 
 Sniffer::Sniffer()
@@ -122,7 +122,7 @@ void Sniffer::stop_capture()
 
 void Sniffer::self_test(const u_char* payload, const unsigned int payload_len )
 {    
-    processIncomingData(payload, payload_len);
+    processIncomingData(0, payload, payload_len);
 }
 
 pcap_if_t* Sniffer::get_capture_device()
@@ -224,6 +224,7 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
         return;
     }
     const u_char* transport_header = ip_header + ip_header_len;
+    uint16_t dst_port = (transport_header[2] << 8) | transport_header[3];
     
     int transport_header_len = ((*(transport_header + 12)) >> 4) * 4;
     const u_char* payload = transport_header + transport_header_len;
@@ -242,11 +243,13 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
         m_packet_count++;
         save_payload(payload, payload_len);
     }
-    processIncomingData(payload, payload_len);
+    
+    processIncomingData(dst_port, payload, payload_len);
 }
 
-void Sniffer::processIncomingData(const u_char* payload, const unsigned int payload_len)
-{    
+void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload, const unsigned int payload_len)
+{
+    auto& m_buffer = m_buffer_map[dst_port];
     m_buffer.insert(m_buffer.end(), payload, payload + payload_len);
 
     while (m_buffer.size() >= 2)
