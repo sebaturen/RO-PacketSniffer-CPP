@@ -3,6 +3,7 @@
 #include "../../public/packets/PackeTable.h"
 #include "../../public/packets/receive/ActorInfo.h"
 #include "../../public/packets/receive/Exp.h"
+#include "../../public/packets/receive/StatInfo.h"
 
 PacketDatabase::PacketDatabase() {
     init();
@@ -624,7 +625,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::MAP_CHANGED_2] = { .desc = "Map Changed", .size = 156, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::ACCOUNT_SERVER_INFO_3] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::ERRORS_1] = { .desc = "Errors", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::STAT_INFO_7] = { .desc = "Stat Info", .size = 12, .type = PacketSizeType::FIXED, .handler = nullptr };
+    packet_map[PacketInfo::STAT_INFO_7] = { .desc = "Stat Info", .size = 12, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<StatInfo>(); } };
     packet_map[PacketInfo::EXP_1] = { .desc = "Exp", .size = 18, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<Exp>(); } };
     packet_map[PacketInfo::LOGIN_ERROR_2] = { .desc = "Login Error", .size = 23, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::REFINE_STATUS] = { .desc = "Refine Status", .size = 32, .type = PacketSizeType::FIXED, .handler = nullptr };

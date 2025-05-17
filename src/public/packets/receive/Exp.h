@@ -16,7 +16,7 @@ public:
 
 private:
     
-    uint32_t actor_id = 0;
+    uint32_t account_id = 0;
     int64_t exp = 0;
     ExpType type = ExpType::UNKNOWN;
 };
