@@ -18,6 +18,9 @@ class StatInfo : public DeserializeHandler
 public:
     void deserialize_internal(const PacketInfo pk_header) override;
 
+    StatType get_type() const { return type; }
+    uint64_t get_value() const { return val; }
+    
 private:
 
     StatType type = StatType::UNKNOWN;

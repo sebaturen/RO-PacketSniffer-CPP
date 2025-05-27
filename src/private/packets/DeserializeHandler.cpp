@@ -1,11 +1,11 @@
-#include "../../public/packets/DeserializeHandler.h"
+#include "packets/DeserializeHandler.h"
 
 #include <iomanip>
 #include <iostream>
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 
-#include "../../public/packets/PacketDatabase.h"
+#include "packets/PacketDatabase.h"
 
 nlohmann::json DeserializeHandler::app_config;
 ctpl::thread_pool DeserializeHandler::curl_pool(5);
@@ -15,7 +15,7 @@ void DeserializeHandler::set_app_config(const nlohmann::json& in_app_config)
     app_config = in_app_config;
 }
 
-void DeserializeHandler::deserialize(const std::vector<uint8_t>* data)
+void DeserializeHandler::deserialize(const uint16_t in_port, const std::vector<uint8_t>* data)
 {
     if (data == nullptr)
     {
@@ -31,6 +31,8 @@ void DeserializeHandler::deserialize(const std::vector<uint8_t>* data)
         start_data = 4;
     }
     pkt_data = std::span(data->data() + start_data, data->size() - start_data);
+    port = in_port;
+    
     deserialize_internal(header);
 }
 

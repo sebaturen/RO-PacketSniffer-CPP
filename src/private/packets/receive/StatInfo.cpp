@@ -1,6 +1,9 @@
-#include "../../../public/packets/receive/StatInfo.h"
+#include "packets/receive/StatInfo.h"
 
 #include <iostream>
+
+#include "gameplay/exp_calculator/ExpCalculator.h"
+#include "gameplay/exp_calculator/ExpCharacter.h"
 
 void StatInfo::deserialize_internal(const PacketInfo pk_header)
 {
@@ -14,16 +17,9 @@ void StatInfo::deserialize_internal(const PacketInfo pk_header)
         (static_cast<int64_t>(pkt_data[7]) << 40) |
         (static_cast<int64_t>(pkt_data[8]) << 48) |
         (static_cast<int64_t>(pkt_data[9]) << 56);
-
-    if (
-          type == StatType::CURRENT_BASE_EXP ||
-          type == StatType::CURRENT_JOB_EXP ||
-          type == StatType::BASE_LVL  ||
-          type == StatType::TOTAL_BASE_EXP  ||
-          type == StatType::TOTAL_JOB_EXP  ||
-          type == StatType::JOB_LVL
-        )
+    
+    if (ExpCharacter* c = ExpCalculator::get_char(port))
     {
-        std::cout << "[INFO] Stat Info. Exp: " << val << " Type: " << static_cast<int>(type) << '\n';
+        c->add_stat_info(*this);
     }
 }

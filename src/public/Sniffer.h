@@ -6,6 +6,11 @@
 #include <nlohmann/json.hpp>
 #include <pcap/pcap.h>
 
+namespace SnifferSpace
+{
+    extern std::vector<std::string> ro_latam_ip_list;
+}
+
 class Sniffer {
 public:
     Sniffer();

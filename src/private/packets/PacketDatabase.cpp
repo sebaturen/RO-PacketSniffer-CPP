@@ -1,9 +1,10 @@
-#include "../../public/packets/PacketDatabase.h"
+#include "packets/PacketDatabase.h"
 
-#include "../../public/packets/PackeTable.h"
-#include "../../public/packets/receive/ActorInfo.h"
-#include "../../public/packets/receive/Exp.h"
-#include "../../public/packets/receive/StatInfo.h"
+#include "packets/PackeTable.h"
+#include "packets/receive/ActorInfo.h"
+#include "packets/receive/Exp.h"
+#include "packets/receive/ReceivedCharacters.h"
+#include "packets/receive/StatInfo.h"
 
 PacketDatabase::PacketDatabase() {
     init();
@@ -508,7 +509,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::EQUIP_ITEM_1] = { .desc = "Equip Item", .size = 11, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::UNEQUIP_ITEM_1] = { .desc = "Unequip Item", .size = 9, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::MAP_PROPERTY_3] = { .desc = "Map Property3", .size = 8, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::RECEIVED_CHARACTERS_1] = { .desc = "Received Characters", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
+    packet_map[PacketInfo::RECEIVED_CHARACTERS_1] = { .desc = "Received Characters", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ReceivedCharacters>(); } };
     packet_map[PacketInfo::AREA_SPELL_MULTIPLE2] = { .desc = "Area Spell Multiple2", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::SYNC_RECEIVED_CHARACTERS] = { .desc = "Sync Received Characters", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::BANKING_CHECK] = { .desc = "Banking Check", .size = 12, .type = PacketSizeType::FIXED, .handler = nullptr };

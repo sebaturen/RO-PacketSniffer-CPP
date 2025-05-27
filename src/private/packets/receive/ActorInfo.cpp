@@ -1,4 +1,4 @@
-#include "../../../public/packets/receive/ActorInfo.h"
+#include "packets/receive/ActorInfo.h"
 
 #include <nlohmann/json.hpp>
 

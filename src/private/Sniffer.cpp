@@ -1,4 +1,4 @@
-#include "../public/Sniffer.h"
+#include "Sniffer.h"
 
 #include <fstream>
 #include <algorithm>
@@ -6,8 +6,8 @@
 #include <thread>
 #include <nlohmann/json.hpp>
 
-#include "../public/packets/DeserializeHandler.h"
-#include "../public/packets/PacketDatabase.h"
+#include "packets/DeserializeHandler.h"
+#include "packets/PacketDatabase.h"
 
 namespace SnifferSpace
 {
@@ -17,7 +17,7 @@ namespace SnifferSpace
     constexpr static int TCP = 6;
     constexpr static int UDP = 17;
     
-    static std::vector<std::string> ro_latam_ip_list =
+    std::vector<std::string> ro_latam_ip_list =
     {
         // login server
         "35.199.111.15",
@@ -320,6 +320,7 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
 
         if (valid)
         {
+            //log("[INFO] Valid packet. Header: ["+ detail->desc +"] " + hexStr(header) + " Size: " + std::to_string(packetSize));
             if (detail->alert)
             {
                 log("[WARN] Alert packet. Header: " + hexStr(header) + " Size: " + std::to_string(packetSize));
@@ -330,9 +331,9 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
             std::vector<uint8_t> packetCopy{ m_buffer.begin(), m_buffer.begin() + packetSize };
             if (detail->handler)
             {
-                threads.emplace_back([detail = detail, packet = packetCopy]() {
+                threads.emplace_back([detail = detail, packet = packetCopy, port = dst_port]() {
                     std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
-                    inHandler->deserialize(&packet);
+                    inHandler->deserialize(port, &packet);
                 });
             }
 

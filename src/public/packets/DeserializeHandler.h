@@ -14,7 +14,7 @@ class DeserializeHandler
 public:
     virtual ~DeserializeHandler() = default;
 
-    void deserialize(const std::vector<uint8_t>* data);
+    void deserialize(const uint16_t in_port, const std::vector<uint8_t>* data);
 
     static void set_app_config(const nlohmann::json& in_app_config);
     
@@ -29,6 +29,7 @@ protected:
     static void send_request(const std::string& endpoint, const std::string& data);
     
     std::span<const uint8_t> pkt_data;
+    uint16_t port;
 
 private:
     

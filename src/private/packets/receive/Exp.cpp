@@ -1,6 +1,8 @@
-#include "../../../public/packets/receive/Exp.h"
+#include "packets/receive/Exp.h"
 
 #include <iostream>
+
+#include "gameplay/exp_calculator/ExpCalculator.h"
 
 void Exp::deserialize_internal(const PacketInfo pk_header)
 {
@@ -17,7 +19,11 @@ void Exp::deserialize_internal(const PacketInfo pk_header)
     
     uint32_t exp_type = pkt_data[12] | (pkt_data[13] << 8) | (pkt_data[14] << 16) | (pkt_data[15] << 24);
     type = static_cast<ExpType>(exp_type);
-    
+
+    if (ExpCharacter* c = ExpCalculator::get_char(port))
+    {
+        c->add_exp(*this);
+    }
     //debug_packet();
-    std::cout << "[INFO] Exp packet. Account ID: " << account_id << " Exp: " << exp << " Type: " << static_cast<int>(type) << '\n';
+    //std::cout << "[INFO] Exp packet. Account ID: " << account_id << " Exp: " << exp << " Type: " << static_cast<int>(type) << '\n';
 }
