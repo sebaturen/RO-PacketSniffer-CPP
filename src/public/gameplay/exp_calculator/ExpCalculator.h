@@ -10,7 +10,9 @@ public:
 
     static void add_characters(const ReceivedCharacters& in_characters);
     static void set_used_character_id(uint16_t port, uint32_t character_id);
+    static void notify_possible_change_port(uint16_t new_port);
     static ExpCharacter* get_char(uint16_t port);
+    static void show_exp();
 
 private:
 

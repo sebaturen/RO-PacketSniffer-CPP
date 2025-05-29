@@ -11,7 +11,7 @@ void ReceivedCharIdAndMap::deserialize_internal(const PacketInfo pk_header)
 
     ExpCalculator::set_used_character_id(port, character_id);
 
-    // Add new IP on sniff list on realtime
+    /* Add new IP on sniff list on realtime --> need refactor,  `ro_latam_ip_list` is only call on start
     size_t colon_pos = map_url.find(':');
     if (colon_pos != std::string::npos)
     {
@@ -22,5 +22,5 @@ void ReceivedCharIdAndMap::deserialize_internal(const PacketInfo pk_header)
         if (std::ranges::find(SnifferSpace::ro_latam_ip_list, ip) == SnifferSpace::ro_latam_ip_list.end()) {
             SnifferSpace::ro_latam_ip_list.emplace_back(ip);
         }
-    }
+    }*/
 }

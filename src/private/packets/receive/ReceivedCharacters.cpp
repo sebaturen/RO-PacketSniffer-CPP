@@ -19,7 +19,27 @@ void ReceivedCharacters::deserialize_internal(const PacketInfo pk_header)
         uint32_t base_level = pkt_data[i + 72] | (pkt_data[i + 73] << 8);
         std::string name(reinterpret_cast<const char*>(pkt_data.data() + i + 88));
 
-        characters.emplace_back(character_id, base_level, job_level, name);
+        uint64_t current_base_exp =
+            static_cast<uint64_t>(pkt_data[i + 4]) |
+            (static_cast<uint64_t>(pkt_data[i + 5]) << 8) |
+            (static_cast<uint64_t>(pkt_data[i + 6]) << 16) |
+            (static_cast<uint64_t>(pkt_data[i + 7]) << 24) |
+            (static_cast<uint64_t>(pkt_data[i + 8]) << 32) |
+            (static_cast<uint64_t>(pkt_data[i + 9]) << 40) |
+            (static_cast<uint64_t>(pkt_data[i + 10]) << 48) |
+            (static_cast<uint64_t>(pkt_data[i + 11]) << 56);
+
+        uint64_t current_job_exp =
+            static_cast<uint64_t>(pkt_data[i + 16]) |
+            (static_cast<uint64_t>(pkt_data[i + 17]) << 8) |
+            (static_cast<uint64_t>(pkt_data[i + 18]) << 16) |
+            (static_cast<uint64_t>(pkt_data[i + 19]) << 24) |
+            (static_cast<uint64_t>(pkt_data[i + 20]) << 32) |
+            (static_cast<uint64_t>(pkt_data[i + 21]) << 40) |
+            (static_cast<uint64_t>(pkt_data[i + 22]) << 48) |
+            (static_cast<uint64_t>(pkt_data[i + 23]) << 56);
+        
+        characters.emplace_back(character_id, base_level, job_level, name, current_base_exp, current_job_exp);
     }
 
     ExpCalculator::add_characters(*this);

@@ -6,6 +6,7 @@
 #include <thread>
 #include <nlohmann/json.hpp>
 
+#include "gameplay/exp_calculator/ExpCalculator.h"
 #include "packets/DeserializeHandler.h"
 #include "packets/PacketDatabase.h"
 
@@ -232,16 +233,16 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
     int total_header_size = SnifferSpace::ETHERNET_HEADER_LEN + ip_header_len + transport_header_len;
     unsigned int payload_len = header->len - total_header_size;
     
+    m_packet_count++;
     if (bDebugMode)
-    {
+    {        
         std::cout << "Coming: ";
         debug_payload(payload, payload_len);        
     }
-
-    m_packet_count++;
-    std::cout << "\rPacket Count: " << m_packet_count << std::flush;
+    
     if (bSaveCapture)
     {
+        std::cout << "\rPacket Count: " << m_packet_count << std::flush;
         save_payload(payload, payload_len);
     }
     
@@ -321,7 +322,7 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
 
         if (valid)
         {
-            //log("[INFO] Valid packet. Header: ["+ detail->desc +"] " + hexStr(header) + " Size: " + std::to_string(packetSize));
+            log("[INFO] Valid packet. Header: ["+ detail->desc +"] " + hexStr(header) + " Size: " + std::to_string(packetSize));
             if (detail->alert)
             {
                 log("[WARN] Alert packet. Header: " + hexStr(header) + " Size: " + std::to_string(packetSize));
@@ -336,6 +337,11 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
                     std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
                     inHandler->deserialize(port, &packet);
                 });
+            }
+            
+            if (header == static_cast<uint16_t>(PacketInfo::EMPTY))
+            {
+                ExpCalculator::notify_possible_change_port(dst_port);
             }
 
             // the minimum size packet detected is 6bytes, so packates have len < 6, are filling with 0x00

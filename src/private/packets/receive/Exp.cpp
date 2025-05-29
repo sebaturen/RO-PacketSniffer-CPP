@@ -24,6 +24,4 @@ void Exp::deserialize_internal(const PacketInfo pk_header)
     {
         c->add_exp(*this);
     }
-    //debug_packet();
-    //std::cout << "[INFO] Exp packet. Account ID: " << account_id << " Exp: " << exp << " Type: " << static_cast<int>(type) << '\n';
 }

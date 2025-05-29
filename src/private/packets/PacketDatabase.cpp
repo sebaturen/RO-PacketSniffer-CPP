@@ -4,6 +4,7 @@
 #include "packets/receive/ActorInfo.h"
 #include "packets/receive/Exp.h"
 #include "packets/receive/ReceivedCharacters.h"
+#include "packets/receive/ReceivedCharIdAndMap.h"
 #include "packets/receive/StatInfo.h"
 #include "packets/receive/UnitLevelUp.h"
 
@@ -623,7 +624,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::WARP_PORTAL_LIST_1] = { .desc = "Warp Portal List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::RODEX_MAIL_LIST_2] = { .desc = "Rodex Mail List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::ACCOUNT_SERVER_INFO_2] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
-    packet_map[PacketInfo::RECEIVED_CHARACTER_ID_AND_MAP_1] = { .desc = "Received Character Id And Map", .size = 156, .type = PacketSizeType::FIXED, .handler = nullptr };
+    packet_map[PacketInfo::RECEIVED_CHARACTER_ID_AND_MAP_1] = { .desc = "Received Character Id And Map", .size = 156, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ReceivedCharIdAndMap>(); } };
     packet_map[PacketInfo::MAP_CHANGED_2] = { .desc = "Map Changed", .size = 156, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::ACCOUNT_SERVER_INFO_3] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::ERRORS_1] = { .desc = "Errors", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
