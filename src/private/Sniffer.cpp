@@ -21,9 +21,12 @@ namespace SnifferSpace
     {
         // login server
         "35.199.111.15",
-        // map server
-        "35.198.41.33", // prontera - map
-        "34.95.145.188", // prontera -inn
+        "35.247.221.22",
+        // Freya
+        "35.198.41.33",
+        "34.95.145.188",
+        // Nid
+        "34.95.139.225",
     };
 }
 
@@ -43,7 +46,6 @@ Sniffer::Sniffer()
     {
         config_file >> config;
     }
-    DeserializeHandler::set_app_config(config);
 }
 
 Sniffer::~Sniffer()
@@ -208,8 +210,6 @@ void Sniffer::save_payload(const u_char* payload, unsigned int payload_len)
     }
     outFile << std::endl;
     outFile.close();
-
-    std::cout << "\rPacket Count: " << m_packet_count << std::flush;
 }
 
 void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_char* pkt_data)
@@ -238,9 +238,10 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
         debug_payload(payload, payload_len);        
     }
 
+    m_packet_count++;
+    std::cout << "\rPacket Count: " << m_packet_count << std::flush;
     if (bSaveCapture)
     {
-        m_packet_count++;
         save_payload(payload, payload_len);
     }
     

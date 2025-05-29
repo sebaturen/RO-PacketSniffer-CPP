@@ -140,7 +140,7 @@ void ActorInfo::report_player()
         { "guild", guild_info }
     };
 
-    send_request(ActorInfoAPI::PLAYER_API_ENDPOINT, data.dump());
+    send_request(ActorInfoAPI::PLAYER_API_ENDPOINT, data);
 }
 
 void ActorInfo::report_monster()
@@ -165,5 +165,5 @@ void ActorInfo::report_player_minimal()
         {"guild_title", string_to_hex(guild_title) }
     };
 
-    send_request(ActorInfoAPI::PARTY_GUILD_API_ENDPOINT, data.dump());
+    send_request(ActorInfoAPI::PARTY_GUILD_API_ENDPOINT, data);
 }

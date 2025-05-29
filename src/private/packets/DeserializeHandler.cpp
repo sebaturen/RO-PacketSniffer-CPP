@@ -1,5 +1,6 @@
 #include "packets/DeserializeHandler.h"
 
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <curl/curl.h>
@@ -7,13 +8,7 @@
 
 #include "packets/PacketDatabase.h"
 
-nlohmann::json DeserializeHandler::app_config;
 ctpl::thread_pool DeserializeHandler::curl_pool(5);
-
-void DeserializeHandler::set_app_config(const nlohmann::json& in_app_config)
-{
-    app_config = in_app_config;
-}
 
 void DeserializeHandler::deserialize(const uint16_t in_port, const std::vector<uint8_t>* data)
 {
@@ -34,6 +29,17 @@ void DeserializeHandler::deserialize(const uint16_t in_port, const std::vector<u
     port = in_port;
     
     deserialize_internal(header);
+}
+
+nlohmann::json DeserializeHandler::get_app_config()
+{
+    std::ifstream config_file("config.json");
+    nlohmann::json config = nullptr;
+    if (config_file)
+    {
+        config_file >> config;
+    }
+    return config;
 }
 
 void DeserializeHandler::debug_packet() const
@@ -59,8 +65,9 @@ std::string DeserializeHandler::string_to_hex(const std::string& input)
     return oss.str();
 }
 
-void DeserializeHandler::send_request(const std::string& endpoint, const std::string& data)
+void DeserializeHandler::send_request(const std::string& endpoint, nlohmann::json& in_data)
 {
+    nlohmann::json app_config = get_app_config();
     if (!app_config.contains("api"))
     {
         std::cout << "[INFO] API not enabled. Skipping request." << std::endl;
@@ -71,6 +78,12 @@ void DeserializeHandler::send_request(const std::string& endpoint, const std::st
     {
         std::cout << "[INFO] API URL or key not set. Skipping request." << std::endl;
         return;
+    }
+    
+    in_data["server_id"] = 0;
+    if (app_config.contains("server_id"))
+    {
+        in_data["server_id"] = app_config.contains("server_id");
     }
     
     curl_pool.push([=](int)
@@ -84,6 +97,7 @@ void DeserializeHandler::send_request(const std::string& endpoint, const std::st
             struct curl_slist* headers = nullptr;
             headers = curl_slist_append(headers, "Content-Type: application/json");
 
+            std::string data = in_data.dump();
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data.size());
