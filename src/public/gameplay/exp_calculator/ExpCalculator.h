@@ -15,6 +15,6 @@ public:
 private:
 
     static std::pmr::unordered_map<uint16_t, ExpCharacter> active_characters; // <port , Exp Character>
-    static std::pmr::unordered_map<uint32_t, ReceivedCharacter> all_character; // < Character Id , Recieved Character>
+    static std::pmr::unordered_map<uint32_t, ReceivedCharacter> all_character; // < Character Id , Received Character>
 };
 

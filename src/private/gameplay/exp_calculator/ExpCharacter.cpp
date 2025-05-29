@@ -41,7 +41,29 @@ void ExpCharacter::add_stat_info(const StatInfo& stat_info)
     case StatType::TOTAL_JOB_EXP:
         total_job_exp = stat_info.get_value();
         break;
+    case StatType::CHANGE_BASE_LEVEL:
+        base_level = stat_info.get_value();
+        last_base_level_up = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        break;
+    case StatType::CHANGE_JOB_LEVEL:
+        job_level = stat_info.get_value();
+        last_job_level_up = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        break;     
     default: 
         break;
+    }
+}
+
+void ExpCharacter::level_up(const UnitLevelUp& level_up_info)
+{
+    if (level_up_info.get_type() == UnitLevelUpType::BASE)
+    {
+        base_level++;
+        last_base_level_up = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    }
+    if (level_up_info.get_type() == UnitLevelUpType::JOB)
+    {
+        job_level++;
+        last_job_level_up = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     }
 }

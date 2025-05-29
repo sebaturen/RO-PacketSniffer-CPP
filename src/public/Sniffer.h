@@ -44,7 +44,7 @@ private:
     static std::vector<std::thread> threads;
     inline static bool bSaveCapture = false;
     
-    inline static bool bDebugMode = true;
+    inline static bool bDebugMode = false;
     inline static uint16_t lastKnowHeader = 0;
 
 };
