@@ -22,6 +22,7 @@ public:
 
 private:
     pcap_if_t* get_capture_device();
+    std::vector<std::string> get_capture_ips() const;
     static std::string select_capture_device(const pcap_if_t* all_devs);
     static void save_payload(const u_char* payload, unsigned int payload_len);
     static void packet_handler(u_char* param, const pcap_pkthdr* header, const u_char* pkt_data);

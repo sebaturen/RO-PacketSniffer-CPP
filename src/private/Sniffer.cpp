@@ -17,18 +17,6 @@ namespace SnifferSpace
     constexpr static int ETHERNET_HEADER_LEN = 14;
     constexpr static int TCP = 6;
     constexpr static int UDP = 17;
-    
-    std::vector<std::string> ro_latam_ip_list =
-    {
-        // login server
-        "35.199.111.15",
-        "35.247.221.22",
-        // Freya
-        "35.198.41.33",
-        "34.95.145.188",
-        // Nid
-        "34.95.139.225",
-    };
 }
 
 std::unordered_map<uint16_t, std::vector<u_char>> Sniffer::m_buffer_map;
@@ -56,13 +44,18 @@ Sniffer::~Sniffer()
 
 void Sniffer::start_capture(bool save)
 {
-    std::vector<std::string> ip_capture = SnifferSpace::ro_latam_ip_list;
     bSaveCapture = save;
     // Set device~
     capture_device = get_capture_device();
     if (!capture_device)
     {
         std::cerr << "Error: No capture device found\n";
+        return;
+    }
+    std::vector<std::string> ip_capture = get_capture_ips();
+    if (ip_capture.empty())
+    {
+        std::cerr << "No target IPs configured in config.json\n";
         return;
     }
 
@@ -165,6 +158,17 @@ pcap_if_t* Sniffer::get_capture_device()
     return nullptr;
 }
 
+std::vector<std::string> Sniffer::get_capture_ips() const
+{
+    if (!config.contains("capture_ips"))
+    {
+        std::cerr << "No target IPs configured in config.json" << std::endl;
+        return {};
+    }
+
+    return config["capture_ips"].get<std::vector<std::string>>();
+}
+
 std::string Sniffer::select_capture_device(const pcap_if_t* all_devs)
 {
     int i = 0;
@@ -240,9 +244,9 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
         debug_payload(payload, payload_len);        
     }
     
+    std::cout << "\rPacket Count: " << m_packet_count << std::flush;
     if (bSaveCapture)
     {
-        std::cout << "\rPacket Count: " << m_packet_count << std::flush;
         save_payload(payload, payload_len);
     }
     
@@ -337,11 +341,6 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
                     std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
                     inHandler->deserialize(port, &packet);
                 });
-            }
-            
-            if (header == static_cast<uint16_t>(PacketInfo::EMPTY))
-            {
-                ExpCalculator::notify_possible_change_port(dst_port);
             }
 
             // the minimum size packet detected is 6bytes, so packates have len < 6, are filling with 0x00
