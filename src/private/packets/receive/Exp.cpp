@@ -20,8 +20,9 @@ void Exp::deserialize_internal(const PacketInfo pk_header)
     uint32_t exp_type = pkt_data[12] | (pkt_data[13] << 8) | (pkt_data[14] << 16) | (pkt_data[15] << 24);
     type = static_cast<ExpType>(exp_type);
 
-    if (ExpCharacter* c = ExpCalculator::get_char(port))
+    ExpCalculator::sync_account(pid, account_id);
+    if (ExpCharacter* c = ExpCalculator::get_char(pid).get())
     {
-        c->add_exp(*this);
+        c->add_exp(this);
     }
 }

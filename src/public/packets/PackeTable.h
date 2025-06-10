@@ -654,6 +654,7 @@ enum class PacketInfo : uint16_t
     GUILD_MEMBER_ADD_1 = 0x0b7e,
     REPUTE_INFO = 0x0b8d,
     HOMUNCULUS_PROPERTY_4 = 0x0ba4,
+    SERVERS_LIST = 0x0c32,
     
     // Unknown list    
     UNKNOWN_0 = 0x0871,

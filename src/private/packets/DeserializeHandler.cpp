@@ -10,7 +10,7 @@
 
 ctpl::thread_pool DeserializeHandler::curl_pool(5);
 
-void DeserializeHandler::deserialize(const uint16_t in_port, const std::vector<uint8_t>* data)
+void DeserializeHandler::deserialize(const uint32_t in_pid, const std::vector<uint8_t>* data)
 {
     if (data == nullptr)
     {
@@ -26,7 +26,7 @@ void DeserializeHandler::deserialize(const uint16_t in_port, const std::vector<u
         start_data = 4;
     }
     pkt_data = std::span(data->data() + start_data, data->size() - start_data);
-    port = in_port;
+    pid = in_pid;
     
     deserialize_internal(header);
 }
@@ -83,7 +83,7 @@ void DeserializeHandler::send_request(const std::string& endpoint, nlohmann::jso
     in_data["server_id"] = 0;
     if (app_config.contains("server_id"))
     {
-        in_data["server_id"] = app_config.contains("server_id");
+        in_data["server_id"] = app_config["server_id"];
     }
     
     curl_pool.push([=](int)

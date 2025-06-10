@@ -9,7 +9,7 @@ void ReceivedCharIdAndMap::deserialize_internal(const PacketInfo pk_header)
     map_name = std::string(reinterpret_cast<const char*>(pkt_data.data() + 4));
     map_url = std::string(reinterpret_cast<const char*>(pkt_data.data() + 26));
 
-    ExpCalculator::set_used_character_id(port, character_id);
+    ExpCalculator::set_used_character_id(pid, character_id);
 
     /* Add new IP on sniff list on realtime --> need refactor,  `ro_latam_ip_list` is only call on start
     size_t colon_pos = map_url.find(':');

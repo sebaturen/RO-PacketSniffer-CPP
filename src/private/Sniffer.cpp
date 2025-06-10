@@ -5,10 +5,14 @@
 #include <iostream>
 #include <thread>
 #include <nlohmann/json.hpp>
+#include <iphlpapi.h>
 
 #include "gameplay/exp_calculator/ExpCalculator.h"
 #include "packets/DeserializeHandler.h"
 #include "packets/PacketDatabase.h"
+
+#pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "ws2_32.lib")
 
 namespace SnifferSpace
 {
@@ -19,6 +23,7 @@ namespace SnifferSpace
     constexpr static int UDP = 17;
 }
 
+std::unordered_map<uint16_t, uint32_t> Sniffer::port_pid_map;
 std::unordered_map<uint16_t, std::vector<u_char>> Sniffer::m_buffer_map;
 std::vector<std::thread> Sniffer::threads;
 
@@ -240,11 +245,11 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
     m_packet_count++;
     if (bDebugMode)
     {        
-        std::cout << "Coming: ";
+        std::cout << "Coming: ["<< dst_port <<"] ";
         debug_payload(payload, payload_len);        
     }
     
-    std::cout << "\rPacket Count: " << m_packet_count << std::flush;
+    //std::cout << "\rPacket Count: " << m_packet_count << std::flush;
     if (bSaveCapture)
     {
         save_payload(payload, payload_len);
@@ -337,9 +342,17 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
             std::vector<uint8_t> packetCopy{ m_buffer.begin(), m_buffer.begin() + packetSize };
             if (detail->handler)
             {
-                threads.emplace_back([detail = detail, packet = packetCopy, port = dst_port]() {
+                auto pid_it = port_pid_map.find(dst_port);
+                if (pid_it == port_pid_map.end())
+                {
+                    update_pip_port();
+                    pid_it = port_pid_map.find(dst_port);
+                }
+                uint32_t process_id = pid_it->second;
+                
+                threads.emplace_back([detail = detail, packet = packetCopy, pid = process_id]() {
                     std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
-                    inHandler->deserialize(port, &packet);
+                    inHandler->deserialize(pid, &packet);
                 });
             }
 
@@ -424,6 +437,40 @@ size_t Sniffer::processHttpPacket(const std::vector<uint8_t>& buffer, bool& vali
     // fallback: only header
     valid = true;
     return headerEnd;
+}
+
+void Sniffer::update_pip_port()
+{
+    DWORD dwSize = 0;
+    DWORD dwRetVal = 0;
+
+    PMIB_TCPTABLE_OWNER_PID pTcpTable = static_cast<MIB_TCPTABLE_OWNER_PID*>(malloc(sizeof(MIB_TCPTABLE_OWNER_PID)));
+    dwSize = sizeof(MIB_TCPTABLE_OWNER_PID);
+
+    // Check size
+    if ((dwRetVal = GetExtendedTcpTable(pTcpTable, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0)) == ERROR_INSUFFICIENT_BUFFER)
+    {
+        free(pTcpTable);
+        pTcpTable = static_cast<MIB_TCPTABLE_OWNER_PID*>(malloc(dwSize));
+    }
+
+    // Get TCP table
+    if ((dwRetVal = GetExtendedTcpTable(pTcpTable, &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0)) == NO_ERROR)
+    {
+        for (DWORD i = 0; i < pTcpTable->dwNumEntries; i++)
+        {
+            MIB_TCPROW_OWNER_PID row = pTcpTable->table[i];
+            
+            const auto pid = row.dwOwningPid;
+            auto pid_port = ntohs(static_cast<u_short>(row.dwLocalPort));
+
+            port_pid_map.insert_or_assign(pid_port, pid);
+        }
+    }
+
+    if (pTcpTable) {
+        free(pTcpTable);
+    }
 }
 
 void Sniffer::log(const std::string& msg)

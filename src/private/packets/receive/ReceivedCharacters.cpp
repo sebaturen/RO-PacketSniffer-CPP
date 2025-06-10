@@ -42,5 +42,5 @@ void ReceivedCharacters::deserialize_internal(const PacketInfo pk_header)
         characters.emplace_back(character_id, base_level, job_level, name, current_base_exp, current_job_exp);
     }
 
-    ExpCalculator::add_characters(*this);
+    ExpCalculator::add_characters(pid, this);
 }

@@ -33,9 +33,15 @@ void StatInfo::deserialize_internal(const PacketInfo pk_header)
             (static_cast<int64_t>(pkt_data[8]) << 48) |
             (static_cast<int64_t>(pkt_data[9]) << 56);
     }
-    
-    if (ExpCharacter* c = ExpCalculator::get_char(port))
+
+    if (StatType::TOTAL_BASE_EXP == type ||
+        StatType::TOTAL_JOB_EXP == type ||
+        StatType::CHANGE_BASE_LEVEL == type ||
+        StatType::CHANGE_JOB_LEVEL == type)
     {
-        c->add_stat_info(*this);
+        if (ExpCharacter* c = ExpCalculator::get_char(pid).get())
+        {
+            c->add_stat_info(this);
+        }
     }
 }
