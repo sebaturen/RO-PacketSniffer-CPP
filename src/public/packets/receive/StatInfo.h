@@ -5,8 +5,8 @@
 enum class StatType : uint32_t
 {
     UNKNOWN = 0,
-    CHANGE_BASE_LEVEL = 11,
-    CHANGE_JOB_LEVEL = 12,
+    // CHANGE_BASE_LEVEL = 11,
+    // CHANGE_JOB_LEVEL = 12,
     // Stat INFO 7
     CURRENT_BASE_EXP = 700, //1+(100*7),
     CURRENT_JOB_EXP = 702,  //2+(100*7),

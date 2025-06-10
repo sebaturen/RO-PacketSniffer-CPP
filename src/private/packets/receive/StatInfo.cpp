@@ -18,10 +18,6 @@ void StatInfo::deserialize_internal(const PacketInfo pk_header)
     if (pk_header == PacketInfo::STAT_INFO_0)
     {
         type = static_cast<StatType>(pk_type);
-        if (type == StatType::CHANGE_JOB_LEVEL) // investigating... but when receive a new job, this start from 0
-        {
-            val += 1;
-        }
     }
     if (pk_header == PacketInfo::STAT_INFO_7)
     {
@@ -36,12 +32,16 @@ void StatInfo::deserialize_internal(const PacketInfo pk_header)
 
     if (StatType::TOTAL_BASE_EXP == type ||
         StatType::TOTAL_JOB_EXP == type ||
-        StatType::CHANGE_BASE_LEVEL == type ||
-        StatType::CHANGE_JOB_LEVEL == type)
+        StatType::CHANGE_BASE_LEVEL == type)
     {
         if (ExpCharacter* c = ExpCalculator::get_char(pid).get())
         {
             c->add_stat_info(this);
         }
+    }
+    else
+    {
+        if (pk_header == PacketInfo::STAT_INFO_0)
+            std::cout << "[" << pid << "] StatInfo: " << static_cast<int>(type) << " = " << val << '\n';
     }
 }

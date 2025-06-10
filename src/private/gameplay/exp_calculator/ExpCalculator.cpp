@@ -105,12 +105,32 @@ void ExpCalculator::show_exp()
             
             if (character == nullptr)
                 continue;
-                        
-            std::cout << " " << character->get_name() << " (" << character->get_base_level() << "/" << character->get_job_level() << "): ";
-            std::cout << "Base Exp: " << character->get_current_base_exp() << " / " << character->get_total_base_exp_required() << ", "
-                      << "Job Exp: " << character->get_current_job_exp() << " / " << character->get_total_job_exp_required() << " ";
-            std::cout << "Last Base Level Up: " << character->get_last_base_level_up() << ", "
-                      << "Last Job Level Up: " << character->get_last_job_level_up() << "\n";
+
+            ExpHour base_exp = character->get_base_exp();
+            ExpHour job_exp = character->get_job_exp();
+            
+            std::cout << " " << character->get_name() << " (" << base_exp.level << "/" << job_exp.level << "): ";
+            std::cout << "Base Exp: " << base_exp.current_exp << " / " << base_exp.total_required_exp << ", "
+                      << "Job Exp: " << job_exp.current_exp << " / " << job_exp.total_required_exp << " ";
+            std::cout << "Exp/H Base: " << base_exp.get_exp_hour() << ", "
+                      << "Job: " << job_exp.get_exp_hour() << "\n";
+
+            float base_hours = base_exp.get_exp_hour() > 0 ? base_exp.total_required_exp / base_exp.get_exp_hour() : -1;
+            float job_hours = job_exp.get_exp_hour() > 0 ? job_exp.total_required_exp / job_exp.get_exp_hour() : -1;
+            
+            if (base_hours >= 0)
+            {
+                int hours_int = static_cast<int>(base_hours);
+                int minutes_int = static_cast<int>((base_hours - hours_int) * 60);
+                std::cout << "Base Exp Time: " << hours_int << "h " << minutes_int << "m\n";
+            }
+            
+            if (job_hours >= 0)
+            {
+                int hours_int = static_cast<int>(job_hours);
+                int minutes_int = static_cast<int>((job_hours - hours_int) * 60);
+                std::cout << "Job Exp Time: " << hours_int << "h " << minutes_int << "m\n";
+            }
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
