@@ -194,7 +194,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::RESURRECTION] = { .desc = "Resurrection", .size = 8, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::MANNER_MESSAGE] = { .desc = "Manner Message", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::GM_SILENCE] = { .desc = "Gm Silence", .size = 27, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::GUILD_ALLIES_ENEMY_LIST] = { .desc = "Guild Allies Enemy List", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
+    packet_map[PacketInfo::GUILD_ALLIES_ENEMY_LIST] = { .desc = "Guild Allies Enemy List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::GUILD_MASTER_MEMBER] = { .desc = "Guild Master Member", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::GUILD_INFO_0] = { .desc = "Guild Info", .size = 114, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::GUILD_EMBLEM] = { .desc = "Guild Emblem", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -204,7 +204,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::GUILD_EXPULSION_0] = { .desc = "Guild Expulsion", .size = 90, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::GUILD_BROKEN] = { .desc = "Guild Broken", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::GUILD_MEMBER_SETTING_LIST] = { .desc = "Guild Member Setting List", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
-    packet_map[PacketInfo::GUILD_SKILLS_LIST] = { .desc = "Guild Skills List", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
+    packet_map[PacketInfo::GUILD_SKILLS_LIST] = { .desc = "Guild Skills List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::GUILD_EXPULSION_LIST_0] = { .desc = "Guild Expulsion List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::GUILD_MEMBERS_TITLE_LIST] = { .desc = "Guild Members Title List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::GUILD_CREATE_RESULT] = { .desc = "Guild Create Result", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -665,7 +665,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::INVENTORY_EXPANSION_RESULT] = { .desc = "Inventory Expansion Result", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::SKILL_CAST_2] = { .desc = "Skill Cast", .size = 29, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::LOAD_CONFIRM] = { .desc = "Load Confirm", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::PING] = { .desc = "Ping", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
+    packet_map[PacketInfo::PING] = { .desc = "Ping", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::HOTKEYS_3] = { .desc = "Hotkeys", .size = 271, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::HOMUNCULUS_PROPERTY_2] = { .desc = "Homunculus Property", .size = 73, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::SKILL_ADD_1] = { .desc = "Skill Add", .size = 17, .type = PacketSizeType::FIXED, .handler = nullptr };
