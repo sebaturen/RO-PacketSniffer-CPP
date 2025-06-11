@@ -2,7 +2,7 @@
 
 namespace SystemChatAPI
 {
-    constexpr const char* SYSTEM_CHAT = "system_chat";
+    constexpr const char* SYSTEM_CHAT = "system/chat";
 }
 
 
