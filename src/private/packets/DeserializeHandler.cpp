@@ -27,8 +27,11 @@ void DeserializeHandler::deserialize(const uint32_t in_pid, const std::vector<ui
     }
     pkt_data = std::span(data->data() + start_data, data->size() - start_data);
     pid = in_pid;
-    
-    deserialize_internal(header);
+
+    if (pkt_data.size() > 0)
+    {
+        deserialize_internal(header);        
+    }    
 }
 
 nlohmann::json DeserializeHandler::get_app_config()

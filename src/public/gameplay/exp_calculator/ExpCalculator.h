@@ -21,6 +21,7 @@ public:
     
     static void set_used_character_id(uint32_t pid, uint32_t character_id);
     static std::shared_ptr<ExpCharacter> get_char(uint32_t pid);
+    static std::shared_ptr<ExpCharacter> get_char(uint32_t pid, uint32_t account_id);
     static void show_exp();
 
 private:

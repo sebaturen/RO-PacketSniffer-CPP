@@ -10,11 +10,11 @@ std::pmr::unordered_map<uint32_t, std::unique_ptr<SyncAccount>> ExpCalculator::a
 
 void ExpCalculator::add_characters(uint32_t pid, const ReceivedCharacters* in_characters)
 {
+    std::unique_lock lock(account_mutex_);
     auto it = all_accounts.find(pid);
     if (it != all_accounts.end())
     {
         SyncAccount* account = it->second.get();
-        std::unique_lock lock(account_mutex_);
         account->characters = *in_characters;
         return;
     }
@@ -88,6 +88,21 @@ std::shared_ptr<ExpCharacter> ExpCalculator::get_char(uint32_t pid)
     if (it != all_accounts.end())
     {
         return it->second->active_character.load();
+    }
+
+    return nullptr;
+}
+
+std::shared_ptr<ExpCharacter> ExpCalculator::get_char(uint32_t pid, uint32_t account_id)
+{
+    auto it = all_accounts.find(pid);
+    if (it != all_accounts.end())
+    {
+        SyncAccount* account = it->second.get();
+        if (account->account_id == account_id)
+        {
+            return it->second->active_character.load();
+        }
     }
 
     return nullptr;

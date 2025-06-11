@@ -342,13 +342,17 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
             std::vector<uint8_t> packetCopy{ m_buffer.begin(), m_buffer.begin() + packetSize };
             if (detail->handler)
             {
-                auto pid_it = port_pid_map.find(dst_port);
-                if (pid_it == port_pid_map.end())
+                uint32_t process_id = 0;
+                if (dst_port != 0)
                 {
-                    update_pip_port();
-                    pid_it = port_pid_map.find(dst_port);
+                    auto pid_it = port_pid_map.find(dst_port);
+                    if (pid_it == port_pid_map.end())
+                    {
+                        update_pip_port();
+                        pid_it = port_pid_map.find(dst_port);
+                    }
+                    process_id = pid_it->second;                    
                 }
-                uint32_t process_id = pid_it->second;
                 
                 threads.emplace_back([detail = detail, packet = packetCopy, pid = process_id]() {
                     std::unique_ptr<DeserializeHandler> inHandler = detail->handler();

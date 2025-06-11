@@ -8,8 +8,7 @@ void UnitLevelUp::deserialize_internal(const PacketInfo pk_header)
     uint32_t type_id = pkt_data[4] | (pkt_data[5] << 8) | (pkt_data[6] << 16) | (pkt_data[7] << 24);
     type = static_cast<UnitLevelUpType>(type_id);
 
-    ExpCalculator::sync_account(pid, account_id);
-    if (ExpCharacter* c = ExpCalculator::get_char(pid).get())
+    if (ExpCharacter* c = ExpCalculator::get_char(pid, account_id).get())
     {
         c->level_up(this);
     }
