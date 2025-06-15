@@ -260,7 +260,7 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
 
 void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload, const unsigned int payload_len)
 {
-    auto& m_buffer = m_buffer_map[dst_port];
+    std::vector<u_char>& m_buffer = m_buffer_map[dst_port];
     m_buffer.insert(m_buffer.end(), payload, payload + payload_len);
 
     while (m_buffer.size() >= 2)
@@ -283,7 +283,7 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
                 msg += " lastKnowHeader: " + hexStr(lastKnowHeader);
             }
             log(msg);
-            debug_payload(payload, payload_len);
+            debug_payload(m_buffer);
             m_buffer.erase(m_buffer.begin());
             continue;
         }
@@ -338,7 +338,7 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
                 debug_payload(m_buffer.data(), m_buffer.size());
             }
             lastKnowHeader = header;
-            //log("[INFO] Deserializing packet. Header: " + hexStr(header) + " Size: " + std::to_string(packetSize));
+            log("[INFO] Deserializing packet. Header: " + hexStr(header) + " Size: " + std::to_string(packetSize));
             std::vector<uint8_t> packetCopy{ m_buffer.begin(), m_buffer.begin() + packetSize };
             if (detail->handler)
             {
@@ -502,6 +502,20 @@ void Sniffer::debug_payload(const u_char* payload, unsigned int payload_len)
                   << std::setw(2)
                   << std::setfill('0')
                   << static_cast<int>(payload[i]) << " ";
+    }
+    std::cout << "]" << std::dec << std::endl;
+}
+
+void Sniffer::debug_payload(const std::vector<u_char>& payload)
+{
+    std::cout << "[";
+    for (const u_char c : payload)
+    {
+        std::cout << std::uppercase
+                    << std::hex
+                    << std::setw(2)
+                    << std::setfill('0')
+                    << static_cast<int>(c) << " ";
     }
     std::cout << "]" << std::dec << std::endl;
 }

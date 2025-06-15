@@ -1,5 +1,6 @@
 #include "gameplay/exp_calculator/ExpCalculator.h"
 
+#include <complex.h>
 #include <iostream>
 #include <shared_mutex>
 
@@ -8,6 +9,19 @@
 static std::shared_mutex account_mutex_;
 std::pmr::unordered_map<uint32_t, std::unique_ptr<SyncAccount>> ExpCalculator::all_accounts;
 
+void ExpCalculator::clean_account(uint32_t pid, uint32_t account_id)
+{    
+    std::unique_lock lock(account_mutex_);
+    auto it = all_accounts.find(pid);
+    if (it != all_accounts.end())
+    {
+        SyncAccount* account = it->second.get();
+        account->account_id = account_id;
+        account->characters = std::nullopt; // Clear characters
+        account->active_character.store(nullptr); // Clear active character
+    }
+}
+
 void ExpCalculator::add_characters(uint32_t pid, const ReceivedCharacters* in_characters)
 {
     std::unique_lock lock(account_mutex_);
@@ -15,7 +29,16 @@ void ExpCalculator::add_characters(uint32_t pid, const ReceivedCharacters* in_ch
     if (it != all_accounts.end())
     {
         SyncAccount* account = it->second.get();
-        account->characters = *in_characters;
+        if (!account->characters)
+        {
+            account->characters = *in_characters;
+            return;
+        }
+
+        for (const ReceivedCharacter& character : in_characters->get_characters())
+        {
+            account->characters->add_or_update_character(character);            
+        }
         return;
     }
 
@@ -110,6 +133,8 @@ std::shared_ptr<ExpCharacter> ExpCalculator::get_char(uint32_t pid, uint32_t acc
 
 void ExpCalculator::show_exp()
 {
+    std::locale my_locale("");
+    std::cout.imbue(my_locale);
     while (true)
     {
         std::cout << "\033[2J\033[H" << std::flush; // temp
@@ -121,17 +146,20 @@ void ExpCalculator::show_exp()
             if (character == nullptr)
                 continue;
 
-            ExpHour base_exp = character->get_base_exp();
-            ExpHour job_exp = character->get_job_exp();
+            ExpHour& base_exp = character->get_base_exp();
+            ExpHour& job_exp = character->get_job_exp();
+
+            float base_exp_h = base_exp.get_exp_hour();
+            float job_exp_h = job_exp.get_exp_hour();
             
             std::cout << " " << character->get_name() << " (" << base_exp.level << "/" << job_exp.level << "): ";
             std::cout << "Base Exp: " << base_exp.current_exp << " / " << base_exp.total_required_exp << ", "
                       << "Job Exp: " << job_exp.current_exp << " / " << job_exp.total_required_exp << " ";
-            std::cout << "Exp/H Base: " << base_exp.get_exp_hour() << ", "
-                      << "Job: " << job_exp.get_exp_hour() << "\n";
+            std::cout << "Exp/H Base: " << base_exp_h << ", "
+                      << "Job: " << job_exp_h << "\n";
 
-            float base_hours = base_exp.get_exp_hour() > 0 ? base_exp.total_required_exp / base_exp.get_exp_hour() : -1;
-            float job_hours = job_exp.get_exp_hour() > 0 ? job_exp.total_required_exp / job_exp.get_exp_hour() : -1;
+            float base_hours = base_exp_h > 0 ? (base_exp.total_required_exp - base_exp.current_exp) / base_exp_h : -1;
+            float job_hours =job_exp_h > 0 ? (job_exp.total_required_exp - job_exp.current_exp) / job_exp_h : -1;
             
             if (base_hours >= 0)
             {

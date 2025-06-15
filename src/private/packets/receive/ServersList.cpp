@@ -22,5 +22,6 @@ void ServersList::deserialize_internal(const PacketInfo pk_header)
         std::cout << server_name << "\t" << current_players << "\t" << url_connection << "\n";
     }
     
+    ExpCalculator::clean_account(pid, account_id);
     ExpCalculator::sync_account(pid, account_id);
 }

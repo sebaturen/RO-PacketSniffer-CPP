@@ -35,6 +35,7 @@ private:
     static bool isAscii(uint16_t byte);
 
     static void debug_payload(const u_char* payload, unsigned int payload_len);
+    static void debug_payload(const std::vector<u_char>& payload);
     
     bool apply_filter(const std::string& filterExpression) const;
     
@@ -46,8 +47,12 @@ private:
     static std::unordered_map<uint16_t, std::vector<u_char>> m_buffer_map;
     static std::vector<std::thread> threads;
     inline static bool bSaveCapture = false;
-    
-    inline static bool bDebugMode = false;
+
     inline static uint16_t lastKnowHeader = 0;
 
+#ifdef NDEBUG
+    inline static bool bDebugMode = false;
+#else
+    inline static bool bDebugMode = true;
+#endif
 };

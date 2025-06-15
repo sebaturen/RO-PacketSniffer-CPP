@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <shared_mutex>
 
 #include "packets/receive/ActorInfo.h"
 #include "packets/receive/Exp.h"
@@ -11,14 +12,25 @@
 
 struct ExpHour
 {
-    float get_exp_hour();
+    ExpHour() : exp_events(std::make_unique<std::deque<std::pair<std::chrono::steady_clock::time_point, int64_t>>>()) {}
+    
+    double get_exp_hour();
     void add_exp(int64_t exp);
-    void clean_old_events();
+    void clean_old_events() const;
     
     uint64_t level = 0;
     uint64_t total_required_exp = 0;
     uint64_t current_exp = 0;
-    std::deque<std::pair<std::chrono::steady_clock::time_point, int64_t>> exp_events; // <time, exp>
+    std::unique_ptr<
+        std::deque<
+            std::pair<
+                std::chrono::steady_clock::time_point,
+                int64_t
+            >
+        >
+    > exp_events = nullptr; // <time, exp>
+
+    mutable std::shared_mutex exp_history_mutex_;
 
 };
 
@@ -35,8 +47,8 @@ public:
     uint32_t get_character_id() const { return character_id; }
     std::string get_name() const { return name; }
 
-    const ExpHour& get_base_exp() const { return base_exp; }
-    const ExpHour& get_job_exp() const { return job_exp; }
+    ExpHour& get_base_exp() { return base_exp; }
+    ExpHour& get_job_exp() { return job_exp; }
     
 private:
 

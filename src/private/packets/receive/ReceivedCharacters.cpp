@@ -44,3 +44,18 @@ void ReceivedCharacters::deserialize_internal(const PacketInfo pk_header)
 
     ExpCalculator::add_characters(pid, this);
 }
+
+void ReceivedCharacters::add_or_update_character(const ReceivedCharacter& in_character)
+{
+    for (ReceivedCharacter& character : characters)
+    {
+        if (character.get_character_id() == in_character.get_character_id())
+        {
+            // Update existing character
+            character = in_character;
+            return;
+        }
+    }
+    
+    characters.push_back(in_character);
+}

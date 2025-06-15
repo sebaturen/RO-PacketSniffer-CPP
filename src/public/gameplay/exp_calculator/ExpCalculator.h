@@ -16,6 +16,7 @@ class ExpCalculator
 {
 public:
 
+    static void clean_account(uint32_t pid, uint32_t account_id);
     static void add_characters(uint32_t pid, const ReceivedCharacters* in_characters);
     static void sync_account(uint32_t pid, uint32_t account_id);
     
