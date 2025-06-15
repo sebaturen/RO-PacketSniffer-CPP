@@ -665,7 +665,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::INVENTORY_EXPANSION_RESULT] = { .desc = "Inventory Expansion Result", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::SKILL_CAST_2] = { .desc = "Skill Cast", .size = 29, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::LOAD_CONFIRM] = { .desc = "Load Confirm", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::PING] = { .desc = "Ping", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
+    packet_map[PacketInfo::PING] = { .desc = "Ping", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::HOTKEYS_3] = { .desc = "Hotkeys", .size = 271, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::HOMUNCULUS_PROPERTY_2] = { .desc = "Homunculus Property", .size = 73, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::SKILL_ADD_1] = { .desc = "Skill Add", .size = 17, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -1627,5 +1627,6 @@ void PacketDatabase::init()
     packet_map[PacketInfo::UNKNOWN_932] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::UNKNOWN_933] = { .desc = "Unknown", .size = 7, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::UNKNOWN_934] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
+    packet_map[PacketInfo::UNKNOWN_935] = { .desc = "Unknown", .size = 204, .type = PacketSizeType::FIXED, .handler = nullptr };
     
 }

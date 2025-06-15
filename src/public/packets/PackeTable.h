@@ -1592,4 +1592,5 @@ enum class PacketInfo : uint16_t
     UNKNOWN_932 = 0x0BA7,
     UNKNOWN_933 = 0x0BA8,
     UNKNOWN_934 = 0x0BA9,
+    UNKNOWN_935 = 0x0049,
 };
