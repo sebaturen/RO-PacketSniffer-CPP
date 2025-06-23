@@ -61,11 +61,6 @@ void ActorInfo::deserialize_extended(const PacketInfo pk_header)
     guild_id = pkt_data[45 + offset_one] | (pkt_data[46 + offset_one] << 8) | (pkt_data[47 + offset_one] << 16) | (pkt_data[48 + offset_one] << 24);
     guild_emblem_id = pkt_data[49 + offset_one] | (pkt_data[50 + offset_one] << 8) | (pkt_data[51 + offset_one] << 16) | (pkt_data[52 + offset_one] << 24);
     sex = pkt_data[58 + offset_one];
-
-    /*uint32_t coords = 0; little endian
-    coords |= static_cast<uint32_t>(pkt_data[59 + offset_one]);
-    coords |= static_cast<uint32_t>(pkt_data[59 + offset_one + 1]) << 8;
-    coords |= static_cast<uint32_t>(pkt_data[59 + offset_one + 2]) << 16;*/
     
     uint32_t coords = 0; // big endian
     coords |= static_cast<uint32_t>(pkt_data[59 + offset_one])     << 16;
