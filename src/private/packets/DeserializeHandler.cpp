@@ -73,13 +73,11 @@ void DeserializeHandler::send_request(const std::string& endpoint, nlohmann::jso
     nlohmann::json app_config = get_app_config();
     if (!app_config.contains("api"))
     {
-        std::cout << "[INFO] API not enabled. Skipping request." << std::endl;
         return;
     }
 
     if (!app_config["api"].contains("url") || !app_config["api"].contains("key"))
     {
-        std::cout << "[INFO] API URL or key not set. Skipping request." << std::endl;
         return;
     }
     
@@ -99,11 +97,12 @@ void DeserializeHandler::send_request(const std::string& endpoint, nlohmann::jso
             std::string response_string;
             struct curl_slist* headers = nullptr;
             headers = curl_slist_append(headers, "Content-Type: application/json");
+            headers = curl_slist_append(headers, std::format("X-API-KEY: {}", std::string(app_config["api"]["key"])).c_str());
 
             std::string data = in_data.dump();
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data.size());
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(data.size()));
             curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, data.c_str());
             
             // Set write function to capture response

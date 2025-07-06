@@ -19,6 +19,7 @@ public:
     void start_capture(bool save = false);
     void stop_capture();
     void self_test(const u_char* payload, const unsigned int payload_len );
+    inline static bool bCaptureStarted = false;
 
 private:
     pcap_if_t* get_capture_device();
@@ -53,6 +54,6 @@ private:
 #ifdef NDEBUG
     inline static bool bDebugMode = false;
 #else
-    inline static bool bDebugMode = true;
+    inline static bool bDebugMode = false;
 #endif
 };

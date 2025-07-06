@@ -40,6 +40,15 @@ Sniffer::Sniffer()
     {
         config_file >> config;
     }
+    
+    if (!config.contains("api"))
+    {
+        std::cout << "[INFO] API not enabled. Skipping requests." << std::endl;
+    }
+    if (!config["api"].contains("url") || !config["api"].contains("key"))
+    {
+        std::cout << "[INFO] API URL or key not set. Skipping requests." << std::endl;
+    }
 }
 
 Sniffer::~Sniffer()
@@ -86,6 +95,7 @@ void Sniffer::start_capture(bool save)
         return;
     }
 
+    bCaptureStarted = true;
     pcap_loop(handle, 0, packet_handler, nullptr);
     return;
 }

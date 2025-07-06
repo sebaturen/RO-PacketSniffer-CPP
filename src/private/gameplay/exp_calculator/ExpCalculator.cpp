@@ -137,6 +137,12 @@ void ExpCalculator::show_exp()
     std::cout.imbue(my_locale);
     while (true)
     {
+        if (!Sniffer::bCaptureStarted)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            continue;
+        }
+        
         std::cout << "\033[2J\033[H" << std::flush; // temp
         std::cout << "Active Characters: ["<< all_accounts.size() <<"]" << "\n";
         for (const std::unique_ptr<SyncAccount>& account : all_accounts | std::views::values)
