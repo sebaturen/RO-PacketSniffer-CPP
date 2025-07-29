@@ -4,9 +4,12 @@
 #include "packets/receive/ActorInfo.h"
 #include "packets/receive/CharacterStatus.h"
 #include "packets/receive/Exp.h"
+#include "packets/receive/GuildEmblem.h"
+#include "packets/receive/GuildEmblemUpdate.h"
 #include "packets/receive/ReceivedCharacters.h"
 #include "packets/receive/ReceivedCharIdAndMap.h"
 #include "packets/receive/ServersList.h"
+#include "packets/receive/ShopSoldLong.h"
 #include "packets/receive/StatInfo.h"
 #include "packets/receive/SyncRequest.h"
 #include "packets/receive/SystemChat.h"
@@ -52,6 +55,9 @@ void PacketDatabase::init()
     packet_map[PacketInfo::EXP_1] = { .desc = "Exp", .size = 18, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<Exp>(); } };
     packet_map[PacketInfo::SERVERS_LIST] = { .desc = "Servers list", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ServersList>(); } };
     packet_map[PacketInfo::SYSTEM_CHAT] = { .desc = "System Chat", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<SystemChat>(); } };
+    packet_map[PacketInfo::GUILD_EMBLEM] = { .desc = "Guild Emblem", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<GuildEmblem>(); } };
+    packet_map[PacketInfo::GUILD_EMBLEM_UPDATE] = { .desc = "Guild Emblem Update", .size = 12, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<GuildEmblemUpdate>(); } };
+    packet_map[PacketInfo::SHOP_SOLD_LONG] = { .desc = "Shop Sold Long", .size = 18, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ShopSoldLong>(); } };
 
     // https://github.com/OpenKore/openkore/blob/master/src/Network/Receive/ServerType0.pm
     packet_map[PacketInfo::ACCOUNT_SERVER_INFO_0] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -197,7 +203,6 @@ void PacketDatabase::init()
     packet_map[PacketInfo::GUILD_ALLIES_ENEMY_LIST] = { .desc = "Guild Allies Enemy List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::GUILD_MASTER_MEMBER] = { .desc = "Guild Master Member", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::GUILD_INFO_0] = { .desc = "Guild Info", .size = 114, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
-    packet_map[PacketInfo::GUILD_EMBLEM] = { .desc = "Guild Emblem", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::GUILD_MEMBERS_LIST_0] = { .desc = "Guild Members List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::GUILD_UPDATE_MEMBER_POSITION] = { .desc = "Guild Update Member Position", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::GUILD_LEAVE_0] = { .desc = "Guild Leave", .size = 66, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -250,7 +255,6 @@ void PacketDatabase::init()
     packet_map[PacketInfo::ARROWCRAFT_LIST] = { .desc = "Arrowcraft List", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
     packet_map[PacketInfo::MONSTER_TYPECHANGE] = { .desc = "Monster Typechange", .size = 11, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::NPC_IMAGE_1] = { .desc = "Npc Image", .size = 67, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::GUILD_EMBLEM_UPDATE] = { .desc = "Guild Emblem Update", .size = 12, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::ACCOUNT_PAYMENT_INFO] = { .desc = "Account Payment Info", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::GUILD_INFO_1] = { .desc = "Guild Info", .size = 114, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::CAST_CANCELLED] = { .desc = "Cast Cancelled", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -401,7 +405,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::CART_ITEMS_STACKABLE_2] = { .desc = "Cart Items Stackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::STORAGE_ITEMS_STACKABLE_2] = { .desc = "Storage Items Stackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::MAP_LOADED_1] = { .desc = "Map Loaded", .size = 13, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::ACTOR_EXISTS_3] = { .desc = "Actor Exists", .size = 67, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
+    packet_map[PacketInfo::ACTOR_EXISTS_3] = { .desc = "Actor Exists", .size = 71, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::ACTOR_CONNECTED_3] = { .desc = "Actor Connected", .size = 59, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::ACTOR_MOVED_3] = { .desc = "Actor Moved", .size = 64, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::FONT] = { .desc = "Font", .size = 8, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -546,7 +550,6 @@ void PacketDatabase::init()
     packet_map[PacketInfo::ACTOR_EXISTS_7] = { .desc = "Actor Exists", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::PRIVATE_MESSAGE_1] = { .desc = "Private Message", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::PRIVATE_MESSAGE_SENT_1] = { .desc = "Private Message Sent", .size = 7, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::SHOP_SOLD_LONG] = { .desc = "Shop Sold Long", .size = 18, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::UNREAD_RODEX] = { .desc = "Unread Rodex", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::RODEX_READ_MAIL] = { .desc = "Rodex Read Mail", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::RODEX_WRITE_RESULT] = { .desc = "Rodex Write Result", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };

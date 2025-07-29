@@ -1,5 +1,6 @@
 #include "packets/receive/ActorInfo.h"
 
+#include <iostream>
 #include <nlohmann/json.hpp>
 
 namespace ActorInfoAPI
@@ -146,6 +147,8 @@ void ActorInfo::report_monster()
         {"coord_x", coord_x},
         {"coord_y", coord_y}
     };
+
+    //std::cout << "[DEBUG] Reporting monster: " << data.dump() << std::endl;
 
     //... send_request(data); <-- TODO: get map!
 }
