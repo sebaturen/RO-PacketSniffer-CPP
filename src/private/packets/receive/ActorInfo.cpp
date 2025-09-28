@@ -70,7 +70,8 @@ void ActorInfo::deserialize_extended(const PacketInfo pk_header)
     coord_x = coords >> 14;
     coord_y = (coords >> 4) & 0x3FF;
     
-    level = pkt_data[65 + offset_two] | (pkt_data[66 + offset_two] << 8) | (pkt_data[67 + offset_two] << 16) | (pkt_data[68 + offset_two] << 24);    
+    level = pkt_data[65 + offset_two] | (pkt_data[66 + offset_two] << 8) | (pkt_data[67 + offset_two] << 16) | (pkt_data[68 + offset_two] << 24);
+    clothes_style = pkt_data[78 + offset_two] | (pkt_data[79 + offset_two] << 8);
     name = std::string(reinterpret_cast<const char*>(pkt_data.data() + (80 + offset_two)), pkt_data.size() - (80 + offset_two));
 
     if (actor_type == ActorType::PLAYER)
@@ -113,7 +114,8 @@ void ActorInfo::report_player()
         {"top_head_id", top_head_id},
         {"mid_head_id", mid_head_id},
         {"low_head_id", low_head_id},
-        {"clothes_color_id", clothes_color_id}
+        {"clothes_color_id", clothes_color_id},
+        {"clothes_style", clothes_style}
     };
 
     nlohmann::json guild_info = {

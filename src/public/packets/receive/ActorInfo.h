@@ -39,6 +39,7 @@ private:
     uint32_t mid_head_id = 0;
     uint32_t hair_color_id = 0;
     uint32_t clothes_color_id = 0;
+    uint16_t clothes_style = 0;
     uint32_t guild_id = 0;
     uint32_t guild_emblem_id = 0;
     uint32_t sex = 0;
