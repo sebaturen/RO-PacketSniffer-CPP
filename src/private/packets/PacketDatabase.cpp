@@ -10,6 +10,7 @@
 #include "packets/receive/ReceivedCharIdAndMap.h"
 #include "packets/receive/ServersList.h"
 #include "packets/receive/ShopSoldLong.h"
+#include "packets/receive/SpecialItemObtain.h"
 #include "packets/receive/StatInfo.h"
 #include "packets/receive/SyncRequest.h"
 #include "packets/receive/SystemChat.h"
@@ -58,6 +59,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::GUILD_EMBLEM] = { .desc = "Guild Emblem", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<GuildEmblem>(); } };
     packet_map[PacketInfo::GUILD_EMBLEM_UPDATE] = { .desc = "Guild Emblem Update", .size = 12, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<GuildEmblemUpdate>(); } };
     packet_map[PacketInfo::SHOP_SOLD_LONG] = { .desc = "Shop Sold Long", .size = 18, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ShopSoldLong>(); } };
+    packet_map[PacketInfo::SPECIAL_ITEM_OBTAIN] = { .desc = "Special Item Obtain", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<SpecialItemObtain>(); } };
 
     // https://github.com/OpenKore/openkore/blob/master/src/Network/Receive/ServerType0.pm
     packet_map[PacketInfo::ACCOUNT_SERVER_INFO_0] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -438,7 +440,6 @@ void PacketDatabase::init()
     packet_map[PacketInfo::INVENTORY_ITEM_REMOVED_1] = { .desc = "Inventory Item Removed", .size = 8, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::SKILL_CAST_1] = { .desc = "Skill Cast", .size = 25, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::PARTY_LEADER] = { .desc = "Party Leader", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::SPECIAL_ITEM_OBTAIN] = { .desc = "Special Item Obtain", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::SOUND_EFFECT_1] = { .desc = "Sound Effect", .size = 26, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::DEFINE_CHECK] = { .desc = "Define Check", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::VENDER_ITEMS_LIST_1] = { .desc = "Vender Items List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };

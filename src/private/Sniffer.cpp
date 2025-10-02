@@ -368,6 +368,8 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
                     std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
                     inHandler->deserialize(pid, &packet);
                 });
+                /*std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
+                inHandler->deserialize(process_id, &packetCopy);*/
             }
 
             // the minimum size packet detected is 6bytes, so packates have len < 6, are filling with 0x00
