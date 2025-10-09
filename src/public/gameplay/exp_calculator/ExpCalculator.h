@@ -24,6 +24,7 @@ public:
     static std::shared_ptr<ExpCharacter> get_char(uint32_t pid);
     static std::shared_ptr<ExpCharacter> get_char(uint32_t pid, uint32_t account_id);
     static void show_exp();
+    static std::string format_exp(float value);
 
 private:
 

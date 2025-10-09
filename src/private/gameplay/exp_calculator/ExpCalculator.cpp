@@ -161,8 +161,8 @@ void ExpCalculator::show_exp()
             std::cout << " " << character->get_name() << " (" << base_exp.level << "/" << job_exp.level << "): ";
             std::cout << "Base Exp: " << base_exp.current_exp << " / " << base_exp.total_required_exp << ", "
                       << "Job Exp: " << job_exp.current_exp << " / " << job_exp.total_required_exp << " ";
-            std::cout << "Exp/H Base: " << base_exp_h << ", "
-                      << "Job: " << job_exp_h << "\n";
+            std::cout << "Exp/H Base: " << format_exp(base_exp_h) << ", "
+                      << "Job: " << format_exp(job_exp_h) << "\n";
 
             float base_hours = base_exp_h > 0 ? (base_exp.total_required_exp - base_exp.current_exp) / base_exp_h : -1;
             float job_hours =job_exp_h > 0 ? (job_exp.total_required_exp - job_exp.current_exp) / job_exp_h : -1;
@@ -183,4 +183,20 @@ void ExpCalculator::show_exp()
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+}
+
+std::string ExpCalculator::format_exp(float value)
+{
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(1);
+
+    if (value >= 1'000'000) {
+        oss << (value / 1'000'000.0f) << "m";
+    } else if (value >= 1'000) {
+        oss << (value / 1'000.0f) << "k";
+    } else {
+        oss << std::setprecision(0) << value;
+    }
+
+    return oss.str();
 }
