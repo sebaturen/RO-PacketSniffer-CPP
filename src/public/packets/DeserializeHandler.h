@@ -26,11 +26,11 @@ protected:
 
     static std::string string_to_hex(const std::string& input);
 
-    static void send_request(const std::string& endpoint, nlohmann::json& in_data);
+    void send_request(const std::string& endpoint, nlohmann::json& in_data) const;
     
     std::span<const uint8_t> pkt_data;
     
-    uint16_t pid;
+    uint16_t pid = 0;
 
 private:
     

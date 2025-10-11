@@ -68,7 +68,7 @@ std::string DeserializeHandler::string_to_hex(const std::string& input)
     return oss.str();
 }
 
-void DeserializeHandler::send_request(const std::string& endpoint, nlohmann::json& in_data)
+void DeserializeHandler::send_request(const std::string& endpoint, nlohmann::json& in_data) const
 {
     nlohmann::json app_config = get_app_config();
     if (!app_config.contains("api"))
@@ -86,6 +86,7 @@ void DeserializeHandler::send_request(const std::string& endpoint, nlohmann::jso
     {
         in_data["server_id"] = app_config["server_id"];
     }
+    in_data["PID"] = std::to_string(pid);
     
     curl_pool.push([=](int)
     {
