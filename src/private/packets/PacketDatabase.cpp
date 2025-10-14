@@ -15,6 +15,9 @@
 #include "packets/receive/SyncRequest.h"
 #include "packets/receive/SystemChat.h"
 #include "packets/receive/UnitLevelUp.h"
+#include "packets/receive//VenderItemsLists.h"
+#include "packets/receive/OfflineCloneFound.h"
+#include "packets/receive/VenderFound.h"
 
 PacketDatabase::PacketDatabase() {
     init();
@@ -60,6 +63,9 @@ void PacketDatabase::init()
     packet_map[PacketInfo::GUILD_EMBLEM_UPDATE] = { .desc = "Guild Emblem Update", .size = 12, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<GuildEmblemUpdate>(); } };
     packet_map[PacketInfo::SHOP_SOLD_LONG] = { .desc = "Shop Sold Long", .size = 18, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ShopSoldLong>(); } };
     packet_map[PacketInfo::SPECIAL_ITEM_OBTAIN] = { .desc = "Special Item Obtain", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<SpecialItemObtain>(); } };
+    packet_map[PacketInfo::VENDER_ITEMS_LIST_1] = { .desc = "Vender Items List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderItemsLists>(); } };
+    packet_map[PacketInfo::VENDER_FOUND] = { .desc = "Vender Found", .size = 86, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderFound>(); } };
+    packet_map[PacketInfo::OFFLINE_CLONE_FOUND_1] = { .desc = "Offline Clone Found", .size = 63, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<OfflineCloneFound>(); } };
 
     // https://github.com/OpenKore/openkore/blob/master/src/Network/Receive/ServerType0.pm
     packet_map[PacketInfo::ACCOUNT_SERVER_INFO_0] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -182,7 +188,6 @@ void PacketDatabase::init()
     packet_map[PacketInfo::CART_OFF] = { .desc = "Cart Off", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::CART_ADD_FAILED] = { .desc = "Cart Add Failed", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::SHOP_SKILL] = { .desc = "Shop Skill", .size = 4, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::VENDER_FOUND] = { .desc = "Vender Found", .size = 86, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::VENDER_LOST] = { .desc = "Vender Lost", .size = 6, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::VENDER_ITEMS_LIST_0] = { .desc = "Vender Items List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::VENDER_BUY_FAIL] = { .desc = "Vender Buy Fail", .size = 7, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -442,7 +447,6 @@ void PacketDatabase::init()
     packet_map[PacketInfo::PARTY_LEADER] = { .desc = "Party Leader", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::SOUND_EFFECT_1] = { .desc = "Sound Effect", .size = 26, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::DEFINE_CHECK] = { .desc = "Define Check", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr, .alert = true };
-    packet_map[PacketInfo::VENDER_ITEMS_LIST_1] = { .desc = "Vender Items List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::BOOKING_REGISTER_REQUEST] = { .desc = "Booking Register Request", .size = 4, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::BOOKING_SEARCH_REQUEST] = { .desc = "Booking Search Request", .size = 5, .type = PacketSizeType::FIXED_MIN, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::BOOKING_DELETE_REQUEST] = { .desc = "Booking Delete Request", .size = 4, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -659,7 +663,6 @@ void PacketDatabase::init()
     packet_map[PacketInfo::QUEST_UPDATE_MISSION_HUNT_3] = { .desc = "Quest Update Mission Hunt", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::QUEST_ALL_LIST_3] = { .desc = "Quest All List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::SHOW_EQ_5] = { .desc = "Show Eq", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
-    packet_map[PacketInfo::OFFLINE_CLONE_FOUND_1] = { .desc = "Offline Clone Found", .size = 63, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::ITEM_LIST_START] = { .desc = "Item List Start", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::ITEM_LIST_STACKABLE] = { .desc = "Item List Stackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[PacketInfo::ITEM_LIST_NONSTACKABLE_0] = { .desc = "Item List Nonstackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
