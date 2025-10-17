@@ -17,6 +17,7 @@
 #include "packets/receive/UnitLevelUp.h"
 #include "packets/receive//VenderItemsLists.h"
 #include "packets/receive/OfflineCloneFound.h"
+#include "packets/receive/PetInfo.h"
 #include "packets/receive/VenderFound.h"
 
 PacketDatabase::PacketDatabase() {
@@ -66,6 +67,8 @@ void PacketDatabase::init()
     packet_map[PacketInfo::VENDER_ITEMS_LIST_1] = { .desc = "Vender Items List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderItemsLists>(); } };
     packet_map[PacketInfo::VENDER_FOUND] = { .desc = "Vender Found", .size = 86, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderFound>(); } };
     packet_map[PacketInfo::OFFLINE_CLONE_FOUND_1] = { .desc = "Offline Clone Found", .size = 63, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<OfflineCloneFound>(); } };
+    packet_map[PacketInfo::PET_INFO] = { .desc = "Pet Info", .size = 37, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<PetInfo>(); } };
+    packet_map[PacketInfo::PET_INFO2] = { .desc = "Pet Info2", .size = 11, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<PetInfo>(); } };
 
     // https://github.com/OpenKore/openkore/blob/master/src/Network/Receive/ServerType0.pm
     packet_map[PacketInfo::ACCOUNT_SERVER_INFO_0] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -252,9 +255,7 @@ void PacketDatabase::init()
     packet_map[PacketInfo::PVP_RANK] = { .desc = "Pvp Rank", .size = 14, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::PET_CAPTURE_PROCESS_0] = { .desc = "Pet Capture Process", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
     packet_map[PacketInfo::PET_CAPTURE_RESULT_0] = { .desc = "Pet Capture Result", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[PacketInfo::PET_INFO] = { .desc = "Pet Info", .size = 37, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::PET_FOOD] = { .desc = "Pet Food", .size = 5, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
-    packet_map[PacketInfo::PET_INFO2] = { .desc = "Pet Info2", .size = 11, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::EGG_LIST] = { .desc = "Egg List", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
     packet_map[PacketInfo::PET_EMOTION] = { .desc = "Pet Emotion", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[PacketInfo::STAT_INFO_3] = { .desc = "Stat Info", .size = 12, .type = PacketSizeType::FIXED, .handler = nullptr };

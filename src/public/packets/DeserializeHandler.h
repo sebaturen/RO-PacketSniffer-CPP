@@ -18,9 +18,9 @@ public:
 
     static nlohmann::json get_app_config();
     
-    virtual void deserialize_internal(const PacketInfo pk_header) = 0;
-
 protected:
+    
+    virtual void deserialize_internal(const PacketInfo pk_header) = 0;
     
     void debug_packet() const;
 
