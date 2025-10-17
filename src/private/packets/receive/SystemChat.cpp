@@ -6,7 +6,7 @@ namespace SystemChatAPI
 }
 
 
-void SystemChat::deserialize_internal(const PacketInfo pk_header)
+void SystemChat::deserialize_internal(const ReceivePacketTable pk_header)
 {
     nlohmann::json data;
     if (pkt_data[0] == 0x1c)

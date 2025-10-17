@@ -44,7 +44,7 @@ class ReceivedCharacters : public DeserializeHandler
 {
 public:
     
-    void deserialize_internal(const PacketInfo pk_header) override;
+    void deserialize_internal(const ReceivePacketTable pk_header) override;
     const std::vector<ReceivedCharacter>& get_characters() const { return characters; }
     void add_or_update_character(const ReceivedCharacter& in_character);
 

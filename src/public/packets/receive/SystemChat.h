@@ -4,5 +4,5 @@
 class SystemChat : public DeserializeHandler
 {
 public:
-    void deserialize_internal(const PacketInfo pk_header) override;
+    void deserialize_internal(const ReceivePacketTable pk_header) override;
 };

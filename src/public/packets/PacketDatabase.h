@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "DeserializeHandler.h"
-#include "PackeTable.h"
+#include "ReceivePacketTable.h"
 
 class DeserializeHandler;
 
@@ -28,7 +28,7 @@ struct packet_detail
 class PacketDatabase
 {
 public:    
-    static const packet_detail* get(const PacketInfo& head);
+    static const packet_detail* get(const ReceivePacketTable& head);
     
 private:
     PacketDatabase();
@@ -37,5 +37,5 @@ private:
     
     static PacketDatabase& instance();
     
-    std::unordered_map<PacketInfo, packet_detail> packet_map;
+    std::unordered_map<ReceivePacketTable, packet_detail> packet_map;
 };

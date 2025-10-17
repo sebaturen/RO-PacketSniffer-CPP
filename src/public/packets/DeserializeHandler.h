@@ -7,7 +7,7 @@
 #include <ctpl_stl.h>
 #include <nlohmann/json.hpp>
 
-#include "PackeTable.h"
+#include "ReceivePacketTable.h"
 
 class DeserializeHandler
 {
@@ -20,7 +20,7 @@ public:
     
 protected:
     
-    virtual void deserialize_internal(const PacketInfo pk_header) = 0;
+    virtual void deserialize_internal(const ReceivePacketTable pk_header) = 0;
     
     void debug_packet() const;
 

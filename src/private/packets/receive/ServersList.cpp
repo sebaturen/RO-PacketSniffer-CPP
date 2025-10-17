@@ -4,7 +4,7 @@
 
 #include "gameplay/exp_calculator/ExpCalculator.h"
 
-void ServersList::deserialize_internal(const PacketInfo pk_header)
+void ServersList::deserialize_internal(const ReceivePacketTable pk_header)
 {
     int32_t server_info_size = 165;
     int32_t header_data = 56;

@@ -19,7 +19,7 @@ enum class StatType : uint32_t
 class StatInfo : public DeserializeHandler
 {
 public:
-    void deserialize_internal(const PacketInfo pk_header) override;
+    void deserialize_internal(const ReceivePacketTable pk_header) override;
 
     StatType get_type() const { return type; }
     uint64_t get_value() const { return val; }

@@ -1,6 +1,6 @@
 #pragma once
 
-enum class PacketInfo : uint16_t
+enum class ReceivePacketTable : uint16_t
 {
     HTTP_RESPONSE = 0x5448,
     EMPTY = 0x0000,

@@ -5,7 +5,7 @@ namespace ActorInfoAPI
     constexpr const char* SPECIAL_ITEM_OBTAIN_API_ENDPOINT = "items/obtain/special";
 }
 
-void SpecialItemObtain::deserialize_internal(const PacketInfo pk_header)
+void SpecialItemObtain::deserialize_internal(const ReceivePacketTable pk_header)
 {
     type = pkt_data[0];
     received_item_id = pkt_data[1] | (pkt_data[2] << 8) | (pkt_data[3] << 16) | (pkt_data[4] << 24);

@@ -12,7 +12,7 @@ class UnitLevelUp : public DeserializeHandler
 {
 public:
 
-    void deserialize_internal(const PacketInfo pk_header) override;
+    void deserialize_internal(const ReceivePacketTable pk_header) override;
 
     UnitLevelUpType get_type() const { return type; }
 

@@ -17,7 +17,7 @@ void DeserializeHandler::deserialize(const uint32_t in_pid, const std::vector<ui
         return;
     }
 
-    const PacketInfo header = static_cast<PacketInfo>((*data)[0] | (*data)[1] << 8);
+    const ReceivePacketTable header = static_cast<ReceivePacketTable>((*data)[0] | (*data)[1] << 8);
     const packet_detail* pkt_detail = PacketDatabase::get(header);
 
     uint8_t start_data = 2;

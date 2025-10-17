@@ -10,16 +10,16 @@ namespace ActorInfoAPI
     constexpr const char* MONSTER_API_ENDPOINT = "monster";
 }
 
-void ActorInfo::deserialize_internal(const PacketInfo pk_header)
+void ActorInfo::deserialize_internal(const ReceivePacketTable pk_header)
 {
-    if (pk_header == PacketInfo::ACTOR_MOVED_8 ||
-        pk_header == PacketInfo::ACTOR_CONNECTED_8 || 
-        pk_header == PacketInfo::ACTOR_EXISTS_8)
+    if (pk_header == ReceivePacketTable::ACTOR_MOVED_8 ||
+        pk_header == ReceivePacketTable::ACTOR_CONNECTED_8 || 
+        pk_header == ReceivePacketTable::ACTOR_EXISTS_8)
     {
         deserialize_extended(pk_header);
     }
     
-    if (pk_header == PacketInfo::ACTOR_INFO_2)
+    if (pk_header == ReceivePacketTable::ACTOR_INFO_2)
     {
         deserialize_minimal();
     }
@@ -28,15 +28,15 @@ void ActorInfo::deserialize_internal(const PacketInfo pk_header)
 /*
  * Contain a extended version of the actor info packet.
  */
-void ActorInfo::deserialize_extended(const PacketInfo pk_header)
+void ActorInfo::deserialize_extended(const ReceivePacketTable pk_header)
 {
     int8_t offset_one = 0;
     int8_t offset_two = 0;
-    if (pk_header == PacketInfo::ACTOR_CONNECTED_8)
+    if (pk_header == ReceivePacketTable::ACTOR_CONNECTED_8)
     {
         offset_two = -1;
     }
-    if (pk_header == PacketInfo::ACTOR_MOVED_8)
+    if (pk_header == ReceivePacketTable::ACTOR_MOVED_8)
     {
         offset_one = 4;
         offset_two = 6;

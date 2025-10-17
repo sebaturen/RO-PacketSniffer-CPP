@@ -5,7 +5,7 @@
 #include "gameplay/exp_calculator/ExpCalculator.h"
 #include "gameplay/exp_calculator/ExpCharacter.h"
 
-void StatInfo::deserialize_internal(const PacketInfo pk_header)
+void StatInfo::deserialize_internal(const ReceivePacketTable pk_header)
 {
     uint32_t pk_type = pkt_data[0] | (pkt_data[1] << 8);
     
@@ -15,11 +15,11 @@ void StatInfo::deserialize_internal(const PacketInfo pk_header)
         (static_cast<int64_t>(pkt_data[4]) << 16) |
         (static_cast<int64_t>(pkt_data[5]) << 24);
     
-    if (pk_header == PacketInfo::STAT_INFO_0)
+    if (pk_header == ReceivePacketTable::STAT_INFO_0)
     {
         type = static_cast<StatType>(pk_type);
     }
-    if (pk_header == PacketInfo::STAT_INFO_7)
+    if (pk_header == ReceivePacketTable::STAT_INFO_7)
     {
         uint32_t n_type = pk_type+(100*7);
         type = static_cast<StatType>(n_type);

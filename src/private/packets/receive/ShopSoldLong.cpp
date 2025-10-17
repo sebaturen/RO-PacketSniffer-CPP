@@ -5,7 +5,7 @@ namespace ShopSoldLongAPI
     constexpr const char* SHOP_SOLD_LONG_API_ENDPOINT = "shop/sold_long";
 }
 
-void ShopSoldLong::deserialize_internal(const PacketInfo pk_header)
+void ShopSoldLong::deserialize_internal(const ReceivePacketTable pk_header)
 {
     count = pkt_data[2] | (pkt_data[3] << 8);
     char_id = pkt_data[4] | (pkt_data[5] << 8) | (pkt_data[6] << 16) | (pkt_data[7] << 24);

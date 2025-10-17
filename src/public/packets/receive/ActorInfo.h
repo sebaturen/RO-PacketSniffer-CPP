@@ -15,11 +15,11 @@ enum class ActorType : int8_t
 class ActorInfo : public DeserializeHandler
 {
 public:
-    void deserialize_internal(const PacketInfo pk_header) override;
+    void deserialize_internal(const ReceivePacketTable pk_header) override;
 
 private:
 
-    void deserialize_extended(const PacketInfo pk_header);
+    void deserialize_extended(const ReceivePacketTable pk_header);
     void deserialize_minimal();
     
     void report_player();

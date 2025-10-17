@@ -7,9 +7,9 @@
 
 #pragma comment(lib, "winmm.lib")
 
-void PetInfo::deserialize_internal(const PacketInfo pk_header)
+void PetInfo::deserialize_internal(const ReceivePacketTable pk_header)
 {
-    if (pk_header == PacketInfo::PET_INFO)
+    if (pk_header == ReceivePacketTable::PET_INFO)
     {        
         name = std::string(reinterpret_cast<const char*>(pkt_data.data()));
         rename_flag = pkt_data[24];
@@ -21,7 +21,7 @@ void PetInfo::deserialize_internal(const PacketInfo pk_header)
         std::cout << "PetInfo "<< name << " | Hungry: " << hungry << std::endl;
     }
     
-    if (pk_header == PacketInfo::PET_INFO2)
+    if (pk_header == ReceivePacketTable::PET_INFO2)
     {
         PetInfoValue value_type = static_cast<PetInfoValue>(pkt_data[0]);
         uint32_t pet_id = pkt_data[1] | (pkt_data[2] << 8) | pkt_data[3] | (pkt_data[4] << 16);

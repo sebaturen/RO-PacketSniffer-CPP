@@ -13,7 +13,7 @@ class Exp : public DeserializeHandler
 {
 public:
     
-    void deserialize_internal(const PacketInfo pk_header) override;
+    void deserialize_internal(const ReceivePacketTable pk_header) override;
 
     uint32_t get_account_id() const { return account_id; }
     ExpType get_type() const { return type; }

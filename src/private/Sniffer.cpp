@@ -283,7 +283,7 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
         }
 
         uint16_t header = static_cast<uint16_t>(m_buffer[0]) | (static_cast<uint16_t>(m_buffer[1]) << 8);
-        const packet_detail* detail = PacketDatabase::get(static_cast<PacketInfo>(header));
+        const packet_detail* detail = PacketDatabase::get(static_cast<ReceivePacketTable>(header));
 
         if (!detail)
         {

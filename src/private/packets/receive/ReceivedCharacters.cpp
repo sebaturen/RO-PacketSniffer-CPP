@@ -4,7 +4,7 @@
 
 #include "gameplay/exp_calculator/ExpCalculator.h"
 
-void ReceivedCharacters::deserialize_internal(const PacketInfo pk_header)
+void ReceivedCharacters::deserialize_internal(const ReceivePacketTable pk_header)
 {    
     if (pkt_data.size() % 155 > 0)
     {

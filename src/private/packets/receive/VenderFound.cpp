@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-void VenderFound::deserialize_internal(const PacketInfo pk_header)
+void VenderFound::deserialize_internal(const ReceivePacketTable pk_header)
 {
     // account id can be a clone id for offline shop
     account_id = pkt_data[0] | (pkt_data[1] << 8) | (pkt_data[2] << 16) | (pkt_data[3] << 24);

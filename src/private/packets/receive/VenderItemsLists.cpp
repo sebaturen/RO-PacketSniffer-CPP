@@ -1,6 +1,6 @@
 #include "packets/receive/VenderItemsLists.h"
 
-void VenderItemsLists::deserialize_internal(const PacketInfo pk_header)
+void VenderItemsLists::deserialize_internal(const ReceivePacketTable pk_header)
 {
     account_id = pkt_data[0] | (pkt_data[1] << 8) | (pkt_data[2] << 16) | (pkt_data[3] << 24);
     shop_id = pkt_data[4] | (pkt_data[5] << 8 ) | (pkt_data[6] << 16) | (pkt_data[7] << 24);
