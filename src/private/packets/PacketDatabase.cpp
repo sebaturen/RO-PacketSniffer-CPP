@@ -16,6 +16,7 @@
 #include "packets/receive/SystemChat.h"
 #include "packets/receive/UnitLevelUp.h"
 #include "packets/receive//VenderItemsLists.h"
+#include "packets/receive/MapChanged.h"
 #include "packets/receive/OfflineCloneFound.h"
 #include "packets/receive/PetInfo.h"
 #include "packets/receive/VenderFound.h"
@@ -69,6 +70,7 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::OFFLINE_CLONE_FOUND_1] = { .desc = "Offline Clone Found", .size = 63, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<OfflineCloneFound>(); } };
     packet_map[ReceivePacketTable::PET_INFO] = { .desc = "Pet Info", .size = 37, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<PetInfo>(); } };
     packet_map[ReceivePacketTable::PET_INFO2] = { .desc = "Pet Info2", .size = 11, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<PetInfo>(); } };
+    packet_map[ReceivePacketTable::MAP_CHANGED_2] = { .desc = "Map Changed", .size = 156, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<MapChanged>(); } };
 
     // https://github.com/OpenKore/openkore/blob/master/src/Network/Receive/ServerType0.pm
     packet_map[ReceivePacketTable::ACCOUNT_SERVER_INFO_0] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -255,7 +257,7 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::PVP_RANK] = { .desc = "Pvp Rank", .size = 14, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::PET_CAPTURE_PROCESS_0] = { .desc = "Pet Capture Process", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
     packet_map[ReceivePacketTable::PET_CAPTURE_RESULT_0] = { .desc = "Pet Capture Result", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[ReceivePacketTable::PET_FOOD] = { .desc = "Pet Food", .size = 5, .type = PacketSizeType::FIXED, .handler = nullptr, .alert = true };
+    packet_map[ReceivePacketTable::PET_FOOD] = { .desc = "Pet Food", .size = 5, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::EGG_LIST] = { .desc = "Egg List", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr };
     packet_map[ReceivePacketTable::PET_EMOTION] = { .desc = "Pet Emotion", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::STAT_INFO_3] = { .desc = "Stat Info", .size = 12, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -643,7 +645,6 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::WARP_PORTAL_LIST_1] = { .desc = "Warp Portal List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::RODEX_MAIL_LIST_2] = { .desc = "Rodex Mail List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::ACCOUNT_SERVER_INFO_2] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
-    packet_map[ReceivePacketTable::MAP_CHANGED_2] = { .desc = "Map Changed", .size = 156, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::ACCOUNT_SERVER_INFO_3] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::ERRORS_1] = { .desc = "Errors", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::LOGIN_ERROR_2] = { .desc = "Login Error", .size = 23, .type = PacketSizeType::FIXED, .handler = nullptr };

@@ -3,11 +3,8 @@
 
 struct VenderItem
 {    
-    uint32_t price = 0;
-    uint32_t quantity = 0;
-    uint32_t position = 0;
-    uint16_t type = 0;
     uint32_t item_id = 0;
+    uint16_t type = 0;
     uint16_t refine = 0;
     uint32_t card_slot_1 = 0;
     uint32_t card_slot_2 = 0;
@@ -22,6 +19,10 @@ struct VenderItem
     uint32_t enchant_slot_4 = 0;
     uint32_t enchant_slot_4_val = 0;
     std::string unknown_part;
+    // For shop-vender_item
+    uint32_t price = 0;
+    uint32_t quantity = 0;
+    uint32_t position = 0;
 };
 
 class VenderItemsLists : public DeserializeHandler
@@ -32,7 +33,10 @@ public:
 
 private:
 
+    void report_vendor_shop();
+
     uint32_t account_id = 0;
     uint32_t shop_id = 0;
     std::vector<VenderItem> vendor_items;
+    std::string map;
 };

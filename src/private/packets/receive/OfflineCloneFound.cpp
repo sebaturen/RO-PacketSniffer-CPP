@@ -2,6 +2,14 @@
 
 #include <iostream>
 
+#include "gameplay/character/Character.h"
+
+namespace OfflineCloneFoundAPI
+{
+    constexpr const char* OFFLINE_API_ENDPOINT = "character/offline";
+}
+
+
 void OfflineCloneFound::deserialize_internal(const ReceivePacketTable pk_header)
 {
     clone_id = pkt_data[0] | (pkt_data[1] << 8) | (pkt_data[2] << 16) | (pkt_data[3] << 24);
@@ -10,6 +18,29 @@ void OfflineCloneFound::deserialize_internal(const ReceivePacketTable pk_header)
 
     coord_x = pkt_data[8] | (pkt_data[9] << 8);
     coord_y = pkt_data[10] | (pkt_data[11] << 8);
+    sex = pkt_data[12];
     
-    std::cout << "Offline clone found [" << clone_id <<"] " << name << " ("<< coord_x <<","<< coord_y <<")" << std::endl;
+    if (Character::get_map(pid, map))
+    {
+        report_clone();
+    }
+}
+
+void OfflineCloneFound::report_clone()
+{
+    nlohmann::json char_info = {
+        {"job_id", job_id},
+        {"sex", sex},
+        {"name", string_to_hex(name) }
+    };
+
+    nlohmann::json data = {
+        {"clone_id", clone_id},
+        {"info", char_info},
+        {"map", string_to_hex(map)},
+        {"coord_x", coord_x},
+        {"coord_y", coord_y}
+    };
+
+    send_request(OfflineCloneFoundAPI::OFFLINE_API_ENDPOINT, data);
 }

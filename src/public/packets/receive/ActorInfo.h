@@ -51,4 +51,5 @@ private:
     std::string party_name;
     std::string guild_name;
     std::string guild_title;
+    std::string coord_map;
 };

@@ -1,5 +1,14 @@
 #include "packets/receive/VenderItemsLists.h"
 
+#include <iostream>
+
+#include "gameplay/character/Character.h"
+
+namespace VenderItemsListsAPI
+{
+    constexpr const char* VENDER_SHOP_ITEMS_API = "shop/items";    
+}
+
 void VenderItemsLists::deserialize_internal(const ReceivePacketTable pk_header)
 {
     account_id = pkt_data[0] | (pkt_data[1] << 8) | (pkt_data[2] << 16) | (pkt_data[3] << 24);
@@ -42,4 +51,50 @@ void VenderItemsLists::deserialize_internal(const ReceivePacketTable pk_header)
 
         vendor_items.push_back(item);
     }
+
+    if (Character::get_map(pid, map))
+    {
+        report_vendor_shop();
+    }
+}
+
+void VenderItemsLists::report_vendor_shop()
+{
+    nlohmann::json shop_items;
+    for (const auto& item : vendor_items)
+    {
+        nlohmann::json api_item = {
+            { "item_id", item.item_id },
+            { "type", item.type },
+            { "refine", item.refine },
+            { "card_slot_1", item.card_slot_1 },
+            { "card_slot_2", item.card_slot_2 },
+            { "card_slot_3", item.card_slot_3 },
+            { "card_slot_4", item.card_slot_4 },
+            { "enchant_slot_1", item.enchant_slot_1 },
+            { "enchant_slot_1_val", item.enchant_slot_1_val },
+            { "enchant_slot_2", item.enchant_slot_2 },
+            { "enchant_slot_2_val", item.enchant_slot_2_val },
+            { "enchant_slot_3", item.enchant_slot_3 },
+            { "enchant_slot_3_val", item.enchant_slot_3_val },
+            { "enchant_slot_4", item.enchant_slot_4 },
+            { "enchant_slot_4_val", item.enchant_slot_4_val },
+            { "unknown_part", string_to_hex(item.unknown_part) },
+            // For shop-vender_item
+            { "price", item.price },
+            { "quantity", item.quantity },
+            { "position", item.position }
+        };
+
+        shop_items.push_back(api_item);
+    }
+    
+    nlohmann::json data = {
+        {"account_id", account_id},
+        {"shop_id", shop_id},
+        {"shop_items", shop_items},
+        {"shop_map", string_to_hex(map)}
+    };
+    
+    send_request(VenderItemsListsAPI::VENDER_SHOP_ITEMS_API, data);
 }

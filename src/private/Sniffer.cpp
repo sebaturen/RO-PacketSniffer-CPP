@@ -56,6 +56,12 @@ Sniffer::~Sniffer()
     stop_capture();
 }
 
+Sniffer* Sniffer::get()
+{
+    static Sniffer instance;
+    return &instance;
+}
+
 void Sniffer::start_capture(bool save)
 {
     bSaveCapture = save;

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
+#include "gameplay/character/Character.h"
+
 namespace ActorInfoAPI
 {
     constexpr const char* PLAYER_API_ENDPOINT = "character";
@@ -69,6 +71,7 @@ void ActorInfo::deserialize_extended(const ReceivePacketTable pk_header)
     coords |= static_cast<uint32_t>(pkt_data[59 + offset_one + 2]);
     coord_x = coords >> 14;
     coord_y = (coords >> 4) & 0x3FF;
+    Character::get_map(pid, coord_map);
     
     level = pkt_data[65 + offset_two] | (pkt_data[66 + offset_two] << 8) | (pkt_data[67 + offset_two] << 16) | (pkt_data[68 + offset_two] << 24);
     clothes_style = pkt_data[78 + offset_two] | (pkt_data[79 + offset_two] << 8);
@@ -130,12 +133,19 @@ void ActorInfo::report_player()
         {"name", string_to_hex(name) }
     };
 
+    nlohmann::json location = {
+        {"coord_map", string_to_hex(coord_map)},
+        {"coord_x", coord_x},
+        {"coord_y", coord_y}
+    };
+
     nlohmann::json data = {
         {"account_id", actor_id},
         {"character_id", character_id},
         {"info", char_info},
         {"customization", customization},
-        { "guild", guild_info }
+        { "guild", guild_info },
+        {"location", location}
     };
 
     send_request(ActorInfoAPI::PLAYER_API_ENDPOINT, data);
@@ -150,6 +160,10 @@ void ActorInfo::report_monster()
         {"coord_y", coord_y}
     };
 
+    if (type_id == 2288)
+    {
+        std::cout << "/navi gld2_ald " << coord_x << "/" << coord_y << std::endl;
+    }
     //std::cout << "[DEBUG] Reporting monster: " << data.dump() << std::endl;
 
     //... send_request(data); <-- TODO: get map!

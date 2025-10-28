@@ -1,6 +1,7 @@
 #include "packets/receive/PetInfo.h"
 
 #include <iostream>
+#include "Sniffer.h"
 #include "ding.h"
 
 #include "gameplay/shop_sniffer/ShopSniffer.h"

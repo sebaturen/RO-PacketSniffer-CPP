@@ -13,15 +13,24 @@ namespace SnifferSpace
 
 class Sniffer {
 public:
-    Sniffer();
-    ~Sniffer();
-
+    
+    static Sniffer* get();
     void start_capture(bool save = false);
     void stop_capture();
     void self_test(const u_char* payload, const unsigned int payload_len );
-    inline static bool bCaptureStarted = false;
+    bool bCaptureStarted = false;
 
+    // Prevent singleton manipulations
+    Sniffer(const Sniffer&) = delete;
+    Sniffer& operator=(const Sniffer&) = delete;
+    Sniffer(Sniffer&&) = delete;
+    Sniffer& operator=(Sniffer&&) = delete;
+    
 private:
+    
+    Sniffer();
+    ~Sniffer();
+    
     pcap_if_t* get_capture_device();
     std::vector<std::string> get_capture_ips() const;
     static std::string select_capture_device(const pcap_if_t* all_devs);

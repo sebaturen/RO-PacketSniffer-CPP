@@ -4,11 +4,11 @@
 #include <vector>
 
 #include "gameplay/exp_calculator/ExpCalculator.h"
+#include "pixelbot/PixelBot.h"
 #include "public/Sniffer.h"
 
 namespace
-{    
-    Sniffer sniffer;
+{
     void capture(bool save = false);
     void reproduce(const std::string& filename);
 }
@@ -45,6 +45,12 @@ int main(int argc, char* argv[])
             capture();
             exp_show.join();
         }
+        else if (arg == "--shops")
+        {
+            std::thread shop_capture(PixelBot::run);
+            capture();
+            shop_capture.join();
+        }
         else
         {
             std::cerr << "Usage: " << argv[0] << " [--save] [--reproduce <filename>]" << std::endl;
@@ -58,7 +64,7 @@ namespace
 {
     void capture(bool save)
     {
-        sniffer.start_capture(save);
+        Sniffer::get()->start_capture(save);
     }
 
     void reproduce(const std::string& filename)
@@ -94,7 +100,7 @@ namespace
 
             // To test
             u_char* char_ptr = reinterpret_cast<u_char*>(lineBytes.data());
-            sniffer.self_test(char_ptr, lineBytes.size());
+            Sniffer::get()->self_test(char_ptr, lineBytes.size());
             //std::cout << "Packet " << lineNumber << " ------------- " << std::endl;
 
             ++lineNumber;

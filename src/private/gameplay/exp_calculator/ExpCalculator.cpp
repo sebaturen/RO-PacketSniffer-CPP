@@ -137,7 +137,7 @@ void ExpCalculator::show_exp()
     std::cout.imbue(my_locale);
     while (true)
     {
-        if (!Sniffer::bCaptureStarted)
+        if (!Sniffer::get()->bCaptureStarted)
         {
             std::this_thread::sleep_for(std::chrono::seconds(5));
             continue;

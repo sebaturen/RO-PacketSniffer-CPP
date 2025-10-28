@@ -1,6 +1,7 @@
 #include "packets/receive/ReceivedCharIdAndMap.h"
 
 #include "Sniffer.h"
+#include "gameplay/character/Character.h"
 #include "gameplay/exp_calculator/ExpCalculator.h"
 
 void ReceivedCharIdAndMap::deserialize_internal(const ReceivePacketTable pk_header)
@@ -10,6 +11,7 @@ void ReceivedCharIdAndMap::deserialize_internal(const ReceivePacketTable pk_head
     map_url = std::string(reinterpret_cast<const char*>(pkt_data.data() + 26));
 
     ExpCalculator::set_used_character_id(pid, character_id);
+    Character::set_map(pid, map_name);
 
     /* Add new IP on sniff list on realtime --> need refactor,  `ro_latam_ip_list` is only call on start
     size_t colon_pos = map_url.find(':');
