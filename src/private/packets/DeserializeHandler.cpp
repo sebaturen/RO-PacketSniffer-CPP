@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <chrono>
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 
@@ -10,11 +11,20 @@
 
 ctpl::thread_pool DeserializeHandler::curl_pool(5);
 
-void DeserializeHandler::deserialize(const uint32_t in_pid, const std::vector<uint8_t>* data)
+void DeserializeHandler::deserialize(const uint32_t in_pid, const std::vector<uint8_t>* data, const long in_timestamp)
 {
     if (data == nullptr)
     {
         return;
+    }
+
+    if (in_timestamp > 0)
+    {
+        timestamp = in_timestamp;
+    }
+    else
+    {
+        timestamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     }
 
     const ReceivePacketTable header = static_cast<ReceivePacketTable>((*data)[0] | (*data)[1] << 8);
@@ -31,7 +41,7 @@ void DeserializeHandler::deserialize(const uint32_t in_pid, const std::vector<ui
     if (pkt_data.size() > 0)
     {
         deserialize_internal(header);        
-    }    
+    }
 }
 
 nlohmann::json DeserializeHandler::get_app_config()
@@ -80,13 +90,19 @@ void DeserializeHandler::send_request(const std::string& endpoint, nlohmann::jso
     {
         return;
     }
-    
+
+    // Server ID
     in_data["server_id"] = 0;
     if (app_config.contains("server_id"))
     {
         in_data["server_id"] = app_config["server_id"];
     }
+
+    // Process ID
     in_data["PID"] = std::to_string(pid);
+
+    // Update Time
+    in_data["timestamp"] = timestamp;
     
     curl_pool.push([=](int)
     {

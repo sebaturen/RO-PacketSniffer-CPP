@@ -17,7 +17,7 @@ public:
     static Sniffer* get();
     void start_capture(bool save = false);
     void stop_capture();
-    void self_test(const u_char* payload, const unsigned int payload_len );
+    void self_test(const u_char* payload, const unsigned int payload_len, const long timestamp);
     bool bCaptureStarted = false;
 
     // Prevent singleton manipulations
@@ -36,7 +36,7 @@ private:
     static std::string select_capture_device(const pcap_if_t* all_devs);
     static void save_payload(const u_char* payload, unsigned int payload_len);
     static void packet_handler(u_char* param, const pcap_pkthdr* header, const u_char* pkt_data);
-    static void processIncomingData(const uint16_t dst_port, const u_char* payload, const unsigned int payload_len);
+    static void processIncomingData(const uint16_t dst_port, const u_char* payload, const unsigned int payload_len, const long timestamp = 0);
     static size_t processHttpPacket(const std::vector<uint8_t>& buffer, bool& valid);
     static void update_pip_port();
 

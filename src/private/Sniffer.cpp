@@ -137,9 +137,9 @@ void Sniffer::stop_capture()
     }
 }
 
-void Sniffer::self_test(const u_char* payload, const unsigned int payload_len )
+void Sniffer::self_test(const u_char* payload, const unsigned int payload_len, const long timestamp)
 {    
-    processIncomingData(0, payload, payload_len);
+    processIncomingData(0, payload, payload_len, timestamp);
 }
 
 pcap_if_t* Sniffer::get_capture_device()
@@ -229,6 +229,9 @@ void Sniffer::save_payload(const u_char* payload, unsigned int payload_len)
 {
     std::ofstream outFile("log_packets.txt", std::ios::app);
 
+    auto time_stamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    outFile << time_stamp << " | ";
     for (size_t i = 0; i < payload_len; ++i) {
         outFile << std::hex << std::uppercase
                 << std::setw(2) << std::setfill('0')
@@ -274,7 +277,7 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
     processIncomingData(dst_port, payload, payload_len);
 }
 
-void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload, const unsigned int payload_len)
+void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload, const unsigned int payload_len, const long timestamp)
 {
     std::vector<u_char>& m_buffer = m_buffer_map[dst_port];
     m_buffer.insert(m_buffer.end(), payload, payload + payload_len);
@@ -370,9 +373,9 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
                     process_id = pid_it->second;                    
                 }
                 
-                threads.emplace_back([detail = detail, packet = packetCopy, pid = process_id]() {
+                threads.emplace_back([detail = detail, packet = packetCopy, pid = process_id, timestamp = timestamp]() {
                     std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
-                    inHandler->deserialize(pid, &packet);
+                    inHandler->deserialize(pid, &packet, timestamp);
                 });
                 /*std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
                 inHandler->deserialize(process_id, &packetCopy);*/

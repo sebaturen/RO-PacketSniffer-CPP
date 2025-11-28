@@ -85,6 +85,12 @@ namespace
             std::string byteStr;
             std::vector<uint8_t> lineBytes;
 
+            long timestamp;
+            char separator;
+
+            iss >> timestamp;
+            iss >> separator;
+            
             while (iss >> byteStr)
             {
                 try
@@ -100,7 +106,7 @@ namespace
 
             // To test
             u_char* char_ptr = reinterpret_cast<u_char*>(lineBytes.data());
-            Sniffer::get()->self_test(char_ptr, lineBytes.size());
+            Sniffer::get()->self_test(char_ptr, lineBytes.size(), timestamp);
             //std::cout << "Packet " << lineNumber << " ------------- " << std::endl;
 
             ++lineNumber;
