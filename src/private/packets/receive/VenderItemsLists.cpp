@@ -6,15 +6,32 @@
 
 namespace VenderItemsListsAPI
 {
-    constexpr const char* VENDER_SHOP_ITEMS_API = "shop/items";    
+    constexpr const char* VENDER_SHOP_ITEMS_API = "shop/items";
 }
 
 void VenderItemsLists::deserialize_internal(const ReceivePacketTable pk_header)
 {
-    account_id = pkt_data[0] | (pkt_data[1] << 8) | (pkt_data[2] << 16) | (pkt_data[3] << 24);
-    shop_id = pkt_data[4] | (pkt_data[5] << 8 ) | (pkt_data[6] << 16) | (pkt_data[7] << 24);
+    size_t item_list_start = 0;
+    if (pk_header == ReceivePacketTable::VENDER_ITEMS_LIST_4)
+    {
+        vendor_id = pkt_data[0] | (pkt_data[1] << 8) | (pkt_data[2] << 16) | (pkt_data[3] << 24);
+        vendor_cid = pkt_data[4] | (pkt_data[5] << 8) | (pkt_data[6] << 16) | (pkt_data[7] << 24);
+        flag = pkt_data[8];
+        expired_date = pkt_data[9] | (pkt_data[10] << 8) | (pkt_data[11] << 16) | (pkt_data[12] << 24);
+        item_list_start = 13;
+    }
+    else if (pk_header == ReceivePacketTable::VENDER_ITEMS_LIST_3)
+    {
+        vendor_id = pkt_data[0] | (pkt_data[1] << 8) | (pkt_data[2] << 16) | (pkt_data[3] << 24);
+        vendor_cid = pkt_data[4] | (pkt_data[5] << 8) | (pkt_data[6] << 16) | (pkt_data[7] << 24);
+        item_list_start = 8;
+    }
+    else
+    {
+        return;
+    }
 
-    size_t i = 8;
+    size_t i = item_list_start;
     while (i < pkt_data.size())
     {
         VenderItem item;
@@ -23,33 +40,39 @@ void VenderItemsLists::deserialize_internal(const ReceivePacketTable pk_header)
         item.position = pkt_data[i+6] | (pkt_data[i+7] << 8);
         item.type = pkt_data[i+8];
         item.item_id = pkt_data[i+9] | (pkt_data[i+10] << 8) | (pkt_data[i+11] << 16) | (pkt_data[i+12] << 24);
-        // skip 13-14 unknown values
-        item.refine = pkt_data[i+15];
-        item.card_slot_1 = pkt_data[i+16] | (pkt_data[i+17] << 8) | (pkt_data[i+18] << 16) | (pkt_data[i+19] << 24);
-        item.card_slot_2 = pkt_data[i+20] | (pkt_data[i+21] << 8) | (pkt_data[i+22] << 16) | (pkt_data[i+23] << 24);
-        item.card_slot_3 = pkt_data[i+24] | (pkt_data[i+25] << 8) | (pkt_data[i+26] << 16) | (pkt_data[i+27] << 24);
-        item.card_slot_4 = pkt_data[i+28] | (pkt_data[i+29] << 8) | (pkt_data[i+30] << 16) | (pkt_data[i+31] << 24);
-        item.enchant_slot_1 = pkt_data[i+32] | (pkt_data[i+33] << 8);
-        item.enchant_slot_1_val = pkt_data[i+34] | (pkt_data[i+35] << 8) | (pkt_data[i+36] << 16);
-        item.enchant_slot_2 = pkt_data[i+37] | (pkt_data[i+38] << 8);
-        item.enchant_slot_2_val = pkt_data[i+39] | (pkt_data[i+40] << 8) | (pkt_data[i+41] << 16);
-        item.enchant_slot_3 = pkt_data[i+42] | (pkt_data[i+43] << 8);
-        item.enchant_slot_3_val = pkt_data[i+44] | (pkt_data[i+45] << 8) | (pkt_data[i+46] << 16);
-        item.enchant_slot_4 = pkt_data[i+47] | (pkt_data[i+48] << 8);
-        item.enchant_slot_4_val = pkt_data[i+49] | (pkt_data[i+50] << 8) | (pkt_data[i+51] << 16);
-        i = i+51;
-
-        // final Unknown section
-        size_t final_size = i + 11;
-        for (; i < final_size; ++i) {
+        item.unknown_value = pkt_data[i+13] | (pkt_data[i+14] << 8);
+        
+        size_t cs = i+14; // Card Slot
+        item.card_slot_1 = pkt_data[cs+1] | (pkt_data[cs+2] << 8) | (pkt_data[cs+3] << 16) | (pkt_data[cs+4] << 24);
+        item.card_slot_2 = pkt_data[cs+5] | (pkt_data[cs+6] << 8) | (pkt_data[cs+7] << 16) | (pkt_data[cs+8] << 24);
+        item.card_slot_3 = pkt_data[cs+9] | (pkt_data[cs+10] << 8) | (pkt_data[cs+11] << 16) | (pkt_data[cs+12] << 24);
+        item.card_slot_4 = pkt_data[cs+13] | (pkt_data[cs+14] << 8) | (pkt_data[cs+15] << 16) | (pkt_data[cs+16] << 24);
+        
+        size_t es = cs+16; // Enchant slot
+        item.enchant_slot_1 = pkt_data[es+1] | (pkt_data[es+2] << 8);
+        item.enchant_slot_1_val = pkt_data[es+3] | (pkt_data[es+4] << 8) | (pkt_data[es+5] << 16);
+        item.enchant_slot_2 = pkt_data[es+6] | (pkt_data[es+7] << 8);
+        item.enchant_slot_2_val = pkt_data[es+8] | (pkt_data[es+9] << 8) | (pkt_data[es+10] << 16);
+        item.enchant_slot_3 = pkt_data[es+11] | (pkt_data[es+12] << 8);
+        item.enchant_slot_3_val = pkt_data[es+13] | (pkt_data[es+14] << 8) | (pkt_data[es+15] << 16);
+        item.enchant_slot_4 = pkt_data[es+16] | (pkt_data[es+17] << 8);
+        item.enchant_slot_4_val = pkt_data[es+18] | (pkt_data[es+19] << 8) | (pkt_data[es+20] << 16);
+        
+        // skip enchant-to-refine unknown values
+        size_t uk = es+20;
+        size_t uk_end = uk+11;
+        for (; uk < uk_end; ++uk) {
             char buffer[4];
-            int ed = sprintf_s(buffer, sizeof(buffer), "%02X ", pkt_data[i]);
+            int ed = sprintf_s(buffer, sizeof(buffer), "%02X ", pkt_data[uk+1]);
             if (ed > 0)
                 item.unknown_part += buffer;
         }
-        i++;
+        
+        size_t r = uk_end;
+        item.refine = pkt_data[r+1] | (pkt_data[r+2] << 8);
+        i = r+3;
 
-        vendor_items.push_back(item);
+        items.push_back(item);
     }
 
     if (Character::get_map(pid, map))
@@ -61,7 +84,7 @@ void VenderItemsLists::deserialize_internal(const ReceivePacketTable pk_header)
 void VenderItemsLists::report_vendor_shop()
 {
     nlohmann::json shop_items;
-    for (const auto& item : vendor_items)
+    for (const auto& item : items)
     {
         nlohmann::json api_item = {
             { "item_id", item.item_id },
@@ -80,7 +103,7 @@ void VenderItemsLists::report_vendor_shop()
             { "enchant_slot_4", item.enchant_slot_4 },
             { "enchant_slot_4_val", item.enchant_slot_4_val },
             { "unknown_part", string_to_hex(item.unknown_part) },
-            // For shop-vender_item
+            { "unknown_part_val", item.unknown_value },
             { "price", item.price },
             { "quantity", item.quantity },
             { "position", item.position }
@@ -90,11 +113,14 @@ void VenderItemsLists::report_vendor_shop()
     }
     
     nlohmann::json data = {
-        {"account_id", account_id},
-        {"shop_id", shop_id},
-        {"shop_items", shop_items},
-        {"shop_map", string_to_hex(map)}
+        {"vendor_id", vendor_id},
+        {"vendor_cid", vendor_cid},
+        {"flag", flag},
+        {"expired_date", expired_date},
+        {"shop_items", shop_items}
     };
     
-    send_request(VenderItemsListsAPI::VENDER_SHOP_ITEMS_API, data);
+    std::cout << data;
+    
+    //send_request(VenderItemsListsAPI::VENDER_SHOP_ITEMS_API, data);
 }

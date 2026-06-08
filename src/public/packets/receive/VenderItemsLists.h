@@ -19,7 +19,7 @@ struct VenderItem
     uint32_t enchant_slot_4 = 0;
     uint32_t enchant_slot_4_val = 0;
     std::string unknown_part;
-    // For shop-vender_item
+    uint32_t unknown_value = 0;
     uint32_t price = 0;
     uint32_t quantity = 0;
     uint32_t position = 0;
@@ -35,8 +35,10 @@ private:
 
     void report_vendor_shop();
 
-    uint32_t account_id = 0;
-    uint32_t shop_id = 0;
-    std::vector<VenderItem> vendor_items;
+    uint32_t vendor_id = 0;
+    uint32_t vendor_cid = 0;
+    uint32_t flag = 0;
+    uint32_t expired_date = 0;
+    std::vector<VenderItem> items;
     std::string map;
 };

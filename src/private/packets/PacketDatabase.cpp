@@ -56,7 +56,8 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::ACTOR_CONNECTED_8] = { .desc = "Actor Connected", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ActorInfo>(); } };
     packet_map[ReceivePacketTable::ACTOR_EXISTS_8] = { .desc = "Actor Exists", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ActorInfo>(); } };
     packet_map[ReceivePacketTable::ACTOR_INFO_2] = { .desc = "Actor Info", .size = 106, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ActorInfo>(); } };
-    packet_map[ReceivePacketTable::RECEIVED_CHARACTER_ID_AND_MAP_1] = { .desc = "Received Character Id And Map", .size = 156, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ReceivedCharIdAndMap>(); } };
+    packet_map[ReceivePacketTable::RECEIVED_CHARACTER_ID_AND_MAP_1] = { .desc = "Received Character Id And Map", .size = 156, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ReceivedCharIdAndMap>(); }, .single_thread = true };
+    packet_map[ReceivePacketTable::RECEIVED_CHARACTER_ID_AND_MAP_0] = { .desc = "Received Character Id And Map", .size = 28, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ReceivedCharIdAndMap>(); }, .single_thread = true };
     packet_map[ReceivePacketTable::STAT_INFO_7] = { .desc = "Stat Info", .size = 12, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<StatInfo>(); } };
     packet_map[ReceivePacketTable::EXP_1] = { .desc = "Exp", .size = 18, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<Exp>(); } };
     packet_map[ReceivePacketTable::SERVERS_LIST] = { .desc = "Servers list", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ServersList>(); } };
@@ -65,12 +66,17 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::GUILD_EMBLEM_UPDATE] = { .desc = "Guild Emblem Update", .size = 12, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<GuildEmblemUpdate>(); } };
     packet_map[ReceivePacketTable::SHOP_SOLD_LONG] = { .desc = "Shop Sold Long", .size = 18, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ShopSoldLong>(); } };
     packet_map[ReceivePacketTable::SPECIAL_ITEM_OBTAIN] = { .desc = "Special Item Obtain", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<SpecialItemObtain>(); } };
-    packet_map[ReceivePacketTable::VENDER_ITEMS_LIST_1] = { .desc = "Vender Items List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderItemsLists>(); } };
-    packet_map[ReceivePacketTable::VENDER_FOUND] = { .desc = "Vender Found", .size = 86, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderFound>(); } };
+    
+    
     packet_map[ReceivePacketTable::OFFLINE_CLONE_FOUND_1] = { .desc = "Offline Clone Found", .size = 63, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<OfflineCloneFound>(); } };
     packet_map[ReceivePacketTable::PET_INFO] = { .desc = "Pet Info", .size = 37, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<PetInfo>(); } };
     packet_map[ReceivePacketTable::PET_INFO2] = { .desc = "Pet Info2", .size = 11, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<PetInfo>(); } };
     packet_map[ReceivePacketTable::MAP_CHANGED_2] = { .desc = "Map Changed", .size = 156, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<MapChanged>(); } };
+    
+    packet_map[ReceivePacketTable::VENDER_ITEMS_LIST_1] = { .desc = "Vender Items List 01", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderItemsLists>(); } };
+    packet_map[ReceivePacketTable::VENDER_ITEMS_LIST_3] = { .desc = "Vender Items List 03", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderItemsLists>(); } };
+    packet_map[ReceivePacketTable::VENDER_ITEMS_LIST_4] = { .desc = "Vender Items List 04", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderItemsLists>(); } };
+    packet_map[ReceivePacketTable::VENDER_FOUND] = { .desc = "Vender Found", .size = 86, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<VenderFound>(); } };
 
     // https://github.com/OpenKore/openkore/blob/master/src/Network/Receive/ServerType0.pm
     packet_map[ReceivePacketTable::ACCOUNT_SERVER_INFO_0] = { .desc = "Account Server Info", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
@@ -81,7 +87,6 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::CHARACTER_CREATION_FAILED] = { .desc = "Character Creation Failed", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::CHARACTER_DELETION_SUCCESSFUL] = { .desc = "Character Deletion Successful", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
     packet_map[ReceivePacketTable::CHARACTER_DELETION_FAILED] = { .desc = "Character Deletion Failed", .size = -1, .type = PacketSizeType::UNKNOWN, .handler = nullptr, .alert = true };
-    packet_map[ReceivePacketTable::RECEIVED_CHARACTER_ID_AND_MAP_0] = { .desc = "Received Character Id And Map", .size = 28, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::RECEIVED_CHARACTERS_0] = { .desc = "Received Characters", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::MAP_LOADED_0] = { .desc = "Map Loaded", .size = 11, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::MAP_LOAD_ERROR] = { .desc = "Map Load Error", .size = 3, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -681,7 +686,6 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::SKILLS_LIST_3] = { .desc = "Skills List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::SKILL_UPDATE_3] = { .desc = "Skill Update", .size = 17, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::ITEM_LIST_NONSTACKABLE_1] = { .desc = "Item List Nonstackable", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
-    packet_map[ReceivePacketTable::VENDER_ITEMS_LIST_3] = { .desc = "Vender Items List", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::INVENTORY_ITEM_ADDED_6] = { .desc = "Inventory Item Added", .size = 70, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::STORAGE_ITEM_ADDED_3] = { .desc = "Storage Item Added", .size = 58, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::CART_ITEM_ADDED_3] = { .desc = "Cart Item Added", .size = 58, .type = PacketSizeType::FIXED, .handler = nullptr };
@@ -1587,7 +1591,6 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::UNKNOWN_883] = { .desc = "Unknown", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_884] = { .desc = "Unknown", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_885] = { .desc = "Unknown", .size = 33, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[ReceivePacketTable::UNKNOWN_886] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_887] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_888] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_889] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
