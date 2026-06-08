@@ -279,6 +279,19 @@ void Sniffer::packet_handler(u_char* param, const pcap_pkthdr* header, const u_c
 
 void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload, const unsigned int payload_len, const long timestamp)
 {
+    // Save and get PID
+    uint32_t process_id = 0;
+    if (dst_port != 0)
+    {
+        auto pid_it = port_pid_map.find(dst_port);
+        if (pid_it == port_pid_map.end())
+        {
+            update_pip_port();
+            pid_it = port_pid_map.find(dst_port);
+        }
+        process_id = pid_it->second;
+    }
+    
     std::vector<u_char>& m_buffer = m_buffer_map[dst_port];
     m_buffer.insert(m_buffer.end(), payload, payload + payload_len);
 
@@ -361,22 +374,21 @@ void Sniffer::processIncomingData(const uint16_t dst_port, const u_char* payload
             std::vector<uint8_t> packetCopy{ m_buffer.begin(), m_buffer.begin() + packetSize };
             if (detail->handler)
             {
-                uint32_t process_id = 0;
-                if (dst_port != 0)
-                {
-                    auto pid_it = port_pid_map.find(dst_port);
-                    if (pid_it == port_pid_map.end())
-                    {
-                        update_pip_port();
-                        pid_it = port_pid_map.find(dst_port);
-                    }
-                    process_id = pid_it->second;                    
-                }
+                std::cout << "["<< dst_port <<"] PID ["<< detail->desc <<" ("<< hexStr(header) <<")]" << process_id << std::endl;
                 
-                threads.emplace_back([detail = detail, packet = packetCopy, pid = process_id, timestamp = timestamp]() {
+                auto deserialize_action = [detail, packetCopy, process_id, timestamp]() mutable {
                     std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
-                    inHandler->deserialize(pid, &packet, timestamp);
-                });
+                    inHandler->deserialize(process_id, &packetCopy, timestamp);
+                };
+                
+                if (detail->single_thread)
+                {
+                    deserialize_action();
+                }
+                else
+                {
+                    threads.emplace_back(std::move(deserialize_action));
+                }
                 /*std::unique_ptr<DeserializeHandler> inHandler = detail->handler();
                 inHandler->deserialize(process_id, &packetCopy);*/
             }

@@ -23,6 +23,7 @@ struct packet_detail
     PacketSizeType type;
     HandlerFactory handler;
     bool alert = false;
+    bool single_thread = false;
 };
 
 class PacketDatabase
