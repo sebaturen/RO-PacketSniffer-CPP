@@ -122,6 +122,10 @@ void DeserializeHandler::send_request(const std::string& endpoint, nlohmann::jso
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(data.size()));
             curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, data.c_str());
             
+            // Disable HTTPs certificate trusted
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+            
             // Set write function to capture response
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, DeserializeHandler::write_callback);
