@@ -6,7 +6,7 @@
 
 namespace VenderItemsListsAPI
 {
-    constexpr const char* VENDER_SHOP_ITEMS_API = "shop/items";
+    constexpr const char* VENDER_SHOP_ITEMS_API = "vending/items";
 }
 
 void VenderItemsLists::deserialize_internal(const ReceivePacketTable pk_header)
@@ -120,7 +120,5 @@ void VenderItemsLists::report_vendor_shop()
         {"shop_items", shop_items}
     };
     
-    std::cout << data;
-    
-    //send_request(VenderItemsListsAPI::VENDER_SHOP_ITEMS_API, data);
+    send_request(VenderItemsListsAPI::VENDER_SHOP_ITEMS_API, data);
 }

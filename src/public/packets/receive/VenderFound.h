@@ -12,7 +12,7 @@ private:
 
     void report_shop();
 
-    uint32_t account_id = 0;
+    uint32_t vendor_id = 0;
     std::string shop_name;
     std::string shop_map;
     

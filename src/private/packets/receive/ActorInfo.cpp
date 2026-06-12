@@ -8,7 +8,7 @@
 namespace ActorInfoAPI
 {
     constexpr const char* PLAYER_API_ENDPOINT = "character";
-    constexpr const char* PARTY_GUILD_API_ENDPOINT = "party_guild";
+    constexpr const char* PARTY_GUILD_API_ENDPOINT = "character/party_guild";
     constexpr const char* MONSTER_API_ENDPOINT = "monster";
 }
 

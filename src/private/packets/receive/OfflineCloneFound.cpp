@@ -6,7 +6,7 @@
 
 namespace OfflineCloneFoundAPI
 {
-    constexpr const char* OFFLINE_API_ENDPOINT = "character/offline";
+    constexpr const char* OFFLINE_API_ENDPOINT = "vending/offline_clone";
 }
 
 
