@@ -656,6 +656,7 @@ enum class ReceivePacketTable : uint16_t
     REPUTE_INFO = 0x0b8d,
     HOMUNCULUS_PROPERTY_4 = 0x0ba4,
     SERVERS_LIST = 0x0c32,
+    UPGRADE_ITEM_BROADCAST = 0x0B5E,
     
     // Unknown list    
     UNKNOWN_0 = 0x0871,
@@ -1543,7 +1544,6 @@ enum class ReceivePacketTable : uint16_t
     UNKNOWN_882 = 0x0B5B,
     UNKNOWN_883 = 0x0B5C,
     UNKNOWN_884 = 0x0B5D,
-    UNKNOWN_885 = 0x0B5E,
     UNKNOWN_887 = 0x0B63,
     UNKNOWN_888 = 0x0B64,
     UNKNOWN_889 = 0x0B65,

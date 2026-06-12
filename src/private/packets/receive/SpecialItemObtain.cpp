@@ -1,6 +1,6 @@
 #include "packets/receive/SpecialItemObtain.h"
 
-namespace ActorInfoAPI
+namespace SpecialItemObtainAPI
 {
     constexpr const char* SPECIAL_ITEM_OBTAIN_API_ENDPOINT = "items/obtain/special";
 }
@@ -36,5 +36,5 @@ void SpecialItemObtain::report_special_item_obtain()
         {"character_name", string_to_hex(character_name)}
     };
     
-    send_request(ActorInfoAPI::SPECIAL_ITEM_OBTAIN_API_ENDPOINT, data);
+    send_request(SpecialItemObtainAPI::SPECIAL_ITEM_OBTAIN_API_ENDPOINT, data);
 }

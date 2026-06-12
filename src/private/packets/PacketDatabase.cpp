@@ -20,6 +20,7 @@
 #include "packets/receive/OfflineCloneFound.h"
 #include "packets/receive/PetInfo.h"
 #include "packets/receive/VenderFound.h"
+#include "packets/receive/UpgradeItemObtain.h"
 
 PacketDatabase::PacketDatabase() {
     init();
@@ -65,8 +66,9 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::GUILD_EMBLEM] = { .desc = "Guild Emblem", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<GuildEmblem>(); } };
     packet_map[ReceivePacketTable::GUILD_EMBLEM_UPDATE] = { .desc = "Guild Emblem Update", .size = 12, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<GuildEmblemUpdate>(); } };
     packet_map[ReceivePacketTable::SHOP_SOLD_LONG] = { .desc = "Shop Sold Long", .size = 18, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<ShopSoldLong>(); } };
-    packet_map[ReceivePacketTable::SPECIAL_ITEM_OBTAIN] = { .desc = "Special Item Obtain", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<SpecialItemObtain>(); } };
     
+    packet_map[ReceivePacketTable::SPECIAL_ITEM_OBTAIN] = { .desc = "Special Item Obtain", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<SpecialItemObtain>(); } };
+    packet_map[ReceivePacketTable::UPGRADE_ITEM_BROADCAST] = { .desc = "Upgrade Item Obtain", .size = 33, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<UpgradeItemObtain>(); } };
     
     packet_map[ReceivePacketTable::OFFLINE_CLONE_FOUND_1] = { .desc = "Offline Clone Found", .size = 63, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<OfflineCloneFound>(); } };
     packet_map[ReceivePacketTable::PET_INFO] = { .desc = "Pet Info", .size = 37, .type = PacketSizeType::FIXED, .handler = []() -> std::unique_ptr<DeserializeHandler> { return std::make_unique<PetInfo>(); } };
@@ -1590,7 +1592,6 @@ void PacketDatabase::init()
     packet_map[ReceivePacketTable::UNKNOWN_882] = { .desc = "Unknown", .size = 14, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_883] = { .desc = "Unknown", .size = 2, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_884] = { .desc = "Unknown", .size = 10, .type = PacketSizeType::FIXED, .handler = nullptr };
-    packet_map[ReceivePacketTable::UNKNOWN_885] = { .desc = "Unknown", .size = 33, .type = PacketSizeType::FIXED, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_887] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_888] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
     packet_map[ReceivePacketTable::UNKNOWN_889] = { .desc = "Unknown", .size = -1, .type = PacketSizeType::INDICATED_IN_PACKET, .handler = nullptr };
